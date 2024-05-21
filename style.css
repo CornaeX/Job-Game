@@ -47,7 +47,17 @@ body {
     color: #fff; /* Light text color */
 }
 
-.form-group button {
+.form-group input::placeholder {
+    color: #bbb; /* Placeholder text color */
+}
+
+.button-group {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;     /* Center vertically (optional) */
+}
+
+.button-group button {
     background-color: #333; /* Darker button color */
     color: #fff;
     padding: 10px 20px;
@@ -56,6 +66,6 @@ body {
     cursor: pointer;
 }
 
-.form-group button:hover {
+.button-group button:hover {
     background-color: #444; /* Slightly lighter button hover color */
 }
