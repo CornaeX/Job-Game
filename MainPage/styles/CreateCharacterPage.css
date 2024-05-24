@@ -1,0 +1,72 @@
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.character-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.form-label {
+    font-size: 1.2rem;
+}
+
+.form-input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    background-color: #333333;
+    color: #ffffff;
+}
+
+.savegame-slots {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.slot-label {
+    font-size: 1.1rem;
+    border: 2px solid #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    background-color: #333333;
+}
+
+.button {
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #333333;
+    color: #ffffff;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.button:hover {
+    background-color: #444444;
+    color: #ffffff;
+    border-color: #dddddd;
+}
