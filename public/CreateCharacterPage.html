@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <h1 class="page-title">Create Character</h1>
-        <form class="character-form">
+        <form class="character-form" onsubmit="createCharacterFile(event)">
             <label for="character-name" class="form-label">Character Name:</label>
             <input type="text" id="character-name" name="character-name" class="form-input" placeholder="Enter character's name">
             <div class="savegame-slots">
@@ -20,5 +20,29 @@
             <button type="submit" class="button create-button">Create Character</button>
         </form>
     </div>
+    <script>
+        async function createCharacterFile(event) {
+            event.preventDefault();
+            const characterName = document.getElementById('character-name').value;
+            if (characterName.trim() === '') {
+                alert('Please enter a character name.');
+                return;
+            }
+
+            const response = await fetch('http://localhost:3000/create-character', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ characterName })
+            });
+
+            if (response.ok) {
+                alert('Character file created successfully!');
+            } else {
+                alert('Failed to create character file.');
+            }
+        }
+    </script>
 </body>
 </html>
