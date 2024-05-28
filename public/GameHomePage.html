@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm RPG Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #1e1e1e;
+            color: #d1d1d1;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        .navigation {
+            width: 250px;
+            background-color: #2b2b2b;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .navigation a {
+            color: #d1d1d1;
+            text-decoration: none;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s, transform 0.3s;
+            border-bottom: 1px solid #3a3a3a;
+        }
+        .navigation a:last-child {
+            border-bottom: none;
+        }
+        .navigation a:hover {
+            background-color: #3a3a3a;
+            transform: translateX(5px);
+        }
+        .navigation i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .main-content h1 {
+            margin-top: 0;
+            color: #ffffff;
+        }
+        .section {
+            background-color: #2b2b2b;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #ffffff;
+        }
+        .chat {
+            background-color: #121212;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .skills {
+            display: flex;
+            justify-content: space-around;
+            background-color: #3a3a3a;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .skill {
+            text-align: center;
+        }
+        .skill img {
+            display: block;
+            margin: 0 auto;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #d1d1d1;
+        }
+        .skill p {
+            margin: 10px 0 0;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navigation">
+            <a href="#"><i class="fas fa-home"></i> Home</a>
+            <a href="#"><i class="fas fa-user"></i> My Profile</a>
+            <a href="#"><i class="fas fa-box"></i> My Inventory</a>
+            <a href="#"><i class="fas fa-envelope"></i> My Mailbox</a>
+            <a href="#"><i class="fas fa-comments"></i> My Messages</a>
+            <a href="#"><i class="fas fa-users"></i> My Friends</a>
+            <a href="#"><i class="fas fa-cogs"></i> My Settings</a>
+            <a href="#"><i class="fas fa-city"></i> Town</a>
+            <a href="#"><i class="fas fa-book"></i> Library</a>
+            <a href="#"><i class="fas fa-info-circle"></i> About / Updates</a>
+            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+        <div class="main-content">
+            <h1>Farm RPG</h1>
+            <div class="section">
+                <h2>My Farm</h2>
+                <p>Farm Name: Pinewood Range</p>
+            </div>
+            <div class="section">
+                <h2>My Inventory</h2>
+                <p>Grown crops, items, materials, etc.</p>
+            </div>
+            <div class="section">
+                <h2>My Workshop</h2>
+                <p>Add to your farm to unlock</p>
+            </div>
+            <div class="section">
+                <h2>Go into Town</h2>
+                <p>Buy & Sell, Improve your farm, etc.</p>
+            </div>
+            <div class="section">
+                <h2>Go Fishing</h2>
+                <p>See what you can catch</p>
+            </div>
+            <div class="section">
+                <h2>Explore the Area</h2>
+                <p>Find new places to explore</p>
+            </div>
+            <div class="section">
+                <h2>Help Needed</h2>
+                <p>Tackle requests for help</p>
+            </div>
+            <div class="chat">
+                <p>Chat will unlock once you reach Farming Level 5.</p>
+            </div>
+            <div class="skills">
+                <div class="skill">
+                    <img src="https://via.placeholder.com/50" alt="Farming">
+                    <p>Farming<br>Level 1</p>
+                </div>
+                <div class="skill">
+                    <img src="https://via.placeholder.com/50" alt="Fishing">
+                    <p>Fishing<br>Level 1</p>
+                </div>
+                <div class="skill">
+                    <img src="https://via.placeholder.com/50" alt="Crafting">
+                    <p>Crafting<br>Level 1</p>
+                </div>
+                <div class="skill">
+                    <img src="https://via.placeholder.com/50" alt="Exploring">
+                    <p>Exploring<br>Level 1</p>
+                </div>
+                <div class="skill">
+                    <img src="https://via.placeholder.com/50" alt="Cooking">
+                    <p>Cooking<br>Locked</p>
+                </div>
+                <div class="skill">
+                    <img src="https://via.placeholder.com/50" alt="Mining">
+                    <p>Mining<br>Coming 2024</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

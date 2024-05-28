@@ -9,19 +9,26 @@
 <body>
     <div class="container">
         <h1 class="page-title">Create Character</h1>
+        <div id="error-panel" class="error-panel"></div>
         <form class="character-form" onsubmit="createCharacterFile(event)">
             <label for="character-name" class="form-label">Character Name:</label>
             <input type="text" id="character-name" name="character-name" class="form-input" placeholder="Enter character's name">
             <button type="submit" class="button create-button">Create Character</button>
         </form>
+        <h2>Saved Games</h2>
+        <div id="saved-games-list">
+            <!-- Saved games will be displayed here -->
+        </div>
     </div>
     <script>
         async function createCharacterFile(event) {
             event.preventDefault();
             const characterName = document.getElementById('character-name').value;
+            const errorPanel = document.getElementById('error-panel');
+            errorPanel.textContent = ''; // Clear previous error
 
             if (characterName.trim() === '') {
-                alert('Please enter a character name.');
+                showError('Please enter a character name.');
                 return;
             }
 
@@ -35,10 +42,45 @@
 
             if (response.ok) {
                 alert('Character file created successfully!');
+                loadSavedGames();
             } else {
-                alert('Failed to create character file.');
+                const errorMessage = await response.text();
+                showError(errorMessage);
             }
         }
+
+        async function loadSavedGames() {
+            const response = await fetch('http://localhost:3000/list-saves');
+            const saveFiles = await response.json();
+            const savedGamesList = document.getElementById('saved-games-list');
+            savedGamesList.innerHTML = '';
+
+            saveFiles.forEach(saveFile => {
+                const loadButton = document.createElement('button');
+                loadButton.textContent = `${saveFile.characterName}`;
+                loadButton.addEventListener('click', () => {
+                    loadSaveGame(saveFile.fileName);
+                });
+                savedGamesList.appendChild(loadButton);
+            });
+        }
+
+        async function loadSaveGame(fileName) {
+            const response = await fetch(`http://localhost:3000/load-save/${fileName}`);
+            const saveData = await response.text();
+            alert(`Loaded Save Game:\n${saveData}`);
+            // You can handle how to display or use the loaded save data here
+        }
+
+        function showError(message) {
+            const errorPanel = document.getElementById('error-panel');
+            errorPanel.textContent = message;
+            setTimeout(() => {
+                errorPanel.textContent = '';
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSavedGames);
     </script>
 </body>
 </html>

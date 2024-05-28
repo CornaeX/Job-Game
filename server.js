@@ -17,30 +17,25 @@ app.use(express.json());
 
 const saveGameDirectory = path.join(__dirname, 'SaveGame');
 
+// Create the SaveGame directory if it doesn't exist
+if (!fs.existsSync(saveGameDirectory)) {
+    fs.mkdirSync(saveGameDirectory);
+}
+
 app.post('/create-character', (req, res) => {
     const { characterName } = req.body;
     if (!characterName) {
         return res.status(400).send('Character name is required');
     }
 
-    // Determine the first available slot
-    const slots = ['Savegame Slot 1', 'Savegame Slot 2', 'Savegame Slot 3'];
-    let availableSlot = null;
+    const filePath = path.join(saveGameDirectory, `${characterName}.save`);
 
-    for (const slot of slots) {
-        const slotFilePath = path.join(saveGameDirectory, `${characterName}-${slot}.save`);
-        if (!fs.existsSync(slotFilePath)) {
-            availableSlot = slot;
-            break;
-        }
+    // Check if a file with the same character name already exists
+    if (fs.existsSync(filePath)) {
+        return res.status(400).send('Character name already exists');
     }
 
-    if (!availableSlot) {
-        return res.status(400).send('No available save slots');
-    }
-
-    const filePath = path.join(saveGameDirectory, `${characterName}-${availableSlot}.save`);
-    const fileContent = `Character Name: ${characterName}\nSave Slot: ${availableSlot}`;
+    const fileContent = `Character Name: ${characterName}`;
 
     fs.writeFile(filePath, fileContent, (err) => {
         if (err) {
@@ -48,6 +43,37 @@ app.post('/create-character', (req, res) => {
         }
         res.send('File created successfully');
     });
+});
+
+app.get('/list-saves', (req, res) => {
+    fs.readdir(saveGameDirectory, (err, files) => {
+        if (err) {
+            return res.status(500).send('Failed to list files');
+        }
+
+        const saveFiles = files.map(file => {
+            const filePath = path.join(saveGameDirectory, file);
+            const content = fs.readFileSync(filePath, 'utf-8');
+            const [nameLine] = content.split('\n');
+            return {
+                fileName: file,
+                characterName: nameLine.split(': ')[1],
+            };
+        });
+
+        res.json(saveFiles);
+    });
+});
+
+app.get('/load-save/:fileName', (req, res) => {
+    const { fileName } = req.params;
+    const filePath = path.join(saveGameDirectory, fileName);
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).send('Save file not found');
+    }
+
+    const content = fs.readFileSync(filePath, 'utf-8');
+    res.send(content);
 });
 
 app.listen(PORT, () => {
