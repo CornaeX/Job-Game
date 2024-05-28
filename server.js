@@ -15,15 +15,34 @@ app.use(cors({
 app.use(express.static('public'));
 app.use(express.json());
 
+const saveGameDirectory = path.join(__dirname, 'SaveGame');
+
 app.post('/create-character', (req, res) => {
     const { characterName } = req.body;
     if (!characterName) {
         return res.status(400).send('Character name is required');
     }
 
-    const filePath = path.join(__dirname, 'SaveGame', `${characterName}.save`);
-    const PlayerName = "Character Name : " + characterName;
-    fs.writeFile(filePath, PlayerName, (err) => {
+    // Determine the first available slot
+    const slots = ['Savegame Slot 1', 'Savegame Slot 2', 'Savegame Slot 3'];
+    let availableSlot = null;
+
+    for (const slot of slots) {
+        const slotFilePath = path.join(saveGameDirectory, `${characterName}-${slot}.save`);
+        if (!fs.existsSync(slotFilePath)) {
+            availableSlot = slot;
+            break;
+        }
+    }
+
+    if (!availableSlot) {
+        return res.status(400).send('No available save slots');
+    }
+
+    const filePath = path.join(saveGameDirectory, `${characterName}-${availableSlot}.save`);
+    const fileContent = `Character Name: ${characterName}\nSave Slot: ${availableSlot}`;
+
+    fs.writeFile(filePath, fileContent, (err) => {
         if (err) {
             return res.status(500).send('Failed to create file');
         }
