@@ -35,7 +35,7 @@ app.post('/create-character', (req, res) => {
         return res.status(400).send('Character name already exists');
     }
 
-    const fileContent = `Character Name: ${characterName}`;
+    const fileContent = `Character_Name: ${characterName}\nMoney: 1000  `;
 
     fs.writeFile(filePath, fileContent, (err) => {
         if (err) {

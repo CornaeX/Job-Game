@@ -68,8 +68,11 @@
         async function loadSaveGame(fileName) {
             const response = await fetch(`http://localhost:3000/load-save/${fileName}`);
             const saveData = await response.text();
-            alert(`Loaded Save Game:\n${saveData}`);
-            // You can handle how to display or use the loaded save data here
+
+            // Store saveData or fileName in local storage or session storage
+            localStorage.setItem('saveData', saveData);
+
+            window.location.href = 'GameHomePage.html';
         }
 
         function showError(message) {
