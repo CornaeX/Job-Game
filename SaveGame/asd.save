@@ -1,2 +1,3 @@
 Character_Name: asd
-Money: 500
+Money: 1000
+Inventory: [AppleSeed-10 ,CarrotSeed-10 ,TomatoSeed-10]

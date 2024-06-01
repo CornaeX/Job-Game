@@ -4,257 +4,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farm RPG Interface</title>
+    <title>Job's Game</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #1e1e1e;
-            color: #d1d1d1;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .container {
-            display: flex;
-            width: 100%;
-        }
-
-        .navigation {
-            width: 250px;
-            background-color: #2b2b2b;
-            padding: 20px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .navigation a {
-            color: #d1d1d1;
-            text-decoration: none;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            transition: background 0.3s, transform 0.3s;
-            border-bottom: 1px solid #3a3a3a;
-        }
-
-        .navigation a:last-child {
-            border-bottom: none;
-        }
-
-        .navigation a:hover {
-            background-color: #3a3a3a;
-            transform: translateX(5px);
-        }
-
-        .navigation i {
-            margin-right: 10px;
-            font-size: 1.2em;
-        }
-
-        .main-content {
-            flex-grow: 1;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .main-content h1 {
-            margin-top: 0;
-            color: #ffffff;
-        }
-
-        .section {
-            background-color: #2b2b2b;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .section h2 {
-            margin-top: 0;
-            color: #ffffff;
-        }
-
-        .chat {
-            background-color: #121212;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .skills {
-            display: flex;
-            justify-content: space-around;
-            background-color: #3a3a3a;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .skill {
-            text-align: center;
-        }
-
-        .skill img {
-            display: block;
-            margin: 0 auto;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid #d1d1d1;
-        }
-
-        .skill p {
-            margin: 10px 0 0;
-            color: #ffffff;
-        }
-
-        .status-bar {
-            background-color: #2b2b2b;
-            padding: 15px;
-            position: fixed;
-            bottom: 0;
-            left: 295px;
-            /* Start just after the navigation bar */
-            width: calc(100% - 250px);
-            /* Adjust width to exclude the navigation bar */
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .status-bar p {
-            margin: 0;
-            color: #ffffff;
-        }
-    </style>
+    <link href="styles/GameHomePage.css" rel="stylesheet">
 </head>
 
 <body>
     <div class="container">
         <div class="navigation">
-            <a href="#"><i class="fas fa-home"></i> Home</a>
+            <div class="main-header" on style="justify-content: center;">
+                <h1>Job's Game</h1>
+            </div>
+            <a href="GameHomePage.html"><i class="fas fa-home"></i> Home</a>
             <a href="#"><i class="fas fa-user"></i> My Profile</a>
-            <a href="#"><i class="fas fa-box"></i> My Inventory</a>
-            <a href="#"><i class="fas fa-envelope"></i> My Mailbox</a>
-            <a href="#"><i class="fas fa-comments"></i> My Messages</a>
-            <a href="#"><i class="fas fa-users"></i> My Friends</a>
-            <a href="#"><i class="fas fa-cogs"></i> My Settings</a>
-            <a href="#"><i class="fas fa-city"></i> Town</a>
-            <a href="#"><i class="fas fa-book"></i> Library</a>
-            <a href="#"><i class="fas fa-info-circle"></i> About / Updates</a>
             <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <button style="background-color: red; height: 100px;" id="sendLevelButton"></button>
         </div>
         <div class="main-content">
-            <div class="main-header">
-                <h1>Job's Game</h1>
+            <div class="main-header" on>
                 <h1 class="username" id="username">Username</h1>
             </div>
-            <div class="section">
-                <h2>Farm</h2>
-                <p>Farm Name: Pinewood Range</p>
-            </div>
-            <div class="section">
-                <h2>Fishing</h2>
-                <p>See what you can catch</p>
-            </div>
-            <div class="section">
-                <h2>Ore Miner</h2>
-                <p>Find new places to explore</p>
-            </div>
-            <div class="section">
-                <h2>Cooking</h2>
-                <p>Add to your farm to unlock</p>
-            </div>
-            <div class="section">
-                <h2>Cashier</h2>
-                <p>Tackle requests for help</p>
-            </div>
-            <div class="section">
-                <h2>Crypto Mining</h2>
-                <p>Tackle requests for help</p>
-            </div>
-            <div class="section">
-                <h2>Inventory</h2>
-                <p>Grown crops, items, materials, etc.</p>
+
+            <div class="section" onclick="window.location.href='MyFarm.html'" style="cursor: pointer;">
+                <img src="img/icon/Farm.png" style="border-radius: 100%;">
+                <div>
+                    <h2>Farm</h2>
+                    <p>Fields to grow your crops</p>
+                </div>
             </div>
 
             <div class="section">
-                <h2>Travel</h2>
-                <p>Buy & Sell, Improve your farm, etc.</p>
+                <img src="img/icon/Fishing.png">
+                <div>
+                    <h2>Fishing</h2>
+                    <p>See what you can catch</p>
+                </div>
             </div>
-            <div class="chat">
-                <p>Chat will unlock once you reach Farming Level 5.</p>
+
+            <div class="section">
+                <img src="img/icon/Ore_Miner.png">
+                <div>
+                    <h2>Ore Miner</h2>
+                    <p>Find new places to explore</p>
+                </div>
             </div>
+
+            <div class="section">
+                <img src="img/icon/cooking.png">
+                <div>
+                    <h2>Cooking</h2>
+                    <p>Add to your farm to unlock</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <img src="img/icon/Cashier.png">
+                <div>
+                    <h2>Cashier</h2>
+                    <p>Tackle requests for help</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <img src="img/icon/Crypto_Mining.png">
+                <div>
+                    <h2>Crypto Mining</h2>
+                    <p>Tackle requests for help</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <img src="img/icon/Inventory.png">
+                <div>
+                    <h2>Inventory</h2>
+                    <p>Grown crops, items, materials, etc.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <img src="img/icon/destination.png">
+                <div>
+                    <h2>Travel</h2>
+                    <p>Buy & Sell, Improve your farm, etc.</p>
+                </div>
+            </div>
+
             <div class="skills">
                 <div class="skill">
-                    <img src="https://via.placeholder.com/50" alt="Farming">
-                    <p>Farming<br>Level 1</p>
+                    <img src="img/icon/Farm.png">
+                    <p id="farming_Level">Farming<br>Level ?</p>
+                    <div class="loading-container">
+                        <div class="loading-bar"></div>
+                    </div>
                 </div>
                 <div class="skill">
-                    <img src="https://via.placeholder.com/50" alt="Fishing">
-                    <p>Fishing<br>Level 1</p>
+                    <img src="img/icon/Fishing.png">
+                    <p id="fishing_Level">Fishing<br>Level ?</p>
+                    <div class="loading-container">
+                        <div class="loading-bar"></div>
+                    </div>
                 </div>
                 <div class="skill">
-                    <img src="https://via.placeholder.com/50" alt="Crafting">
-                    <p>Crafting<br>Level 1</p>
+                    <img src="img/icon/Ore_Miner.png">
+                    <p id="oreMiner_Level">Ore Miner<br>Level ?</p>
+                    <div class="loading-container">
+                        <div class="loading-bar"></div>
+                    </div>
                 </div>
                 <div class="skill">
-                    <img src="https://via.placeholder.com/50" alt="Exploring">
-                    <p>Exploring<br>Level 1</p>
+                    <img src="img/icon/Cooking.png">
+                    <p id="cooking_Level">Cooking<br>Level ?</p>
+                    <div class="loading-container">
+                        <div class="loading-bar"></div>
+                    </div>
                 </div>
                 <div class="skill">
-                    <img src="https://via.placeholder.com/50" alt="Cooking">
-                    <p>Cooking<br>Locked</p>
+                    <img src="img/icon/Cashier.png">
+                    <p id="cashier_Level">Cashier<br>Level ?</p>
+                    <div class="loading-container">
+                        <div class="loading-bar"></div>
+                    </div>
                 </div>
                 <div class="skill">
-                    <img src="https://via.placeholder.com/50" alt="Mining">
-                    <p>Mining<br>Coming 2024</p>
+                    <img src="img/icon/Crypto_Mining.png">
+                    <p id="cryptoMining_Level">Crypto Mining<br>Level ?</p>
+                    <div class="loading-container">
+                        <div class="loading-bar"></div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="status-bar">
-            <p>Money: $1000</p>
-            <p>Status: Healthy</p>
+            <p id="cash">Money: $0</p>
         </div>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            let characterName = '';
+
             const saveData = localStorage.getItem('saveData');
             if (saveData) {
                 console.log(saveData);
-
             } else {
                 alert('No save data found.');
             }
 
             function extractAndLogCharacterData(data) {
-                // Split the savedata into lines
                 const lines = data.split('\n');
-
-                // Initialize variables to hold the extracted values
-                let characterName = '';
                 let money = 0;
 
-                // Loop through each line and extract the relevant data
                 lines.forEach(line => {
                     if (line.startsWith('Character_Name:')) {
                         characterName = line.split('Character_Name: ')[1].trim();
@@ -262,19 +160,86 @@
                     if (line.startsWith('Money:')) {
                         money = parseInt(line.split('Money: ')[1].trim(), 10);
                     }
+                    if (line.startsWith('Farming_Level:')) {
+                        Farming_Level = parseInt(line.split('Farming_Level: ')[1].trim(), 10);
+                    }
+                    if (line.startsWith('Fishing_Level:')) {
+                        Fishing_Level = parseInt(line.split('Fishing_Level: ')[1].trim(), 10);
+                    }
+                    if (line.startsWith('OreMiner_Level:')) {
+                        OreMiner_Level = parseInt(line.split('OreMiner_Level: ')[1].trim(), 10);
+                    }
+                    if (line.startsWith('Cooking_Level:')) {
+                        Cooking_Level = parseInt(line.split('Cooking_Level: ')[1].trim(), 10);
+                    }
+                    if (line.startsWith('Cashier_Level:')) {
+                        Cashier_Level = parseInt(line.split('Cashier_Level: ')[1].trim(), 10);
+                    }
+                    if (line.startsWith('CryptoMining_Level:')) {
+                        CryptoMining_Level = parseInt(line.split('CryptoMining_Level: ')[1].trim(), 10);
+                    }
                 });
 
-                const UID = document.getElementById('username');
-                UID.textContent = characterName;
+                const username = document.getElementById('username');
+                const cash = document.getElementById('cash');
+                const farming_Level = document.getElementById('farming_Level');
+                const fishing_Level = document.getElementById('fishing_Level');
+                const oreMiner_Level = document.getElementById('oreMiner_Level');
+                const cooking_Level = document.getElementById('cooking_Level');
+                const cashier_Level = document.getElementById('cashier_Level');
+                const cryptoMining_Level = document.getElementById('cryptoMining_Level');
 
+                username.textContent = `WELCOME ${characterName}`;
+                cash.textContent = `Money $${money}`;
+                farming_Level.innerHTML = `Farming <br> Level ${Farming_Level}`;
+                fishing_Level.innerHTML = `Fishing <br> Level ${Fishing_Level}`;
+                oreMiner_Level.innerHTML = `Ore Miner <br> Level ${OreMiner_Level}`;
+                cooking_Level.innerHTML = `Cooking <br> Level ${Cooking_Level}`;
+                cashier_Level.innerHTML = `Cashier <br> Level ${Cashier_Level}`;
+                cryptoMining_Level.innerHTML = `Crypto Mining <br> Level ${CryptoMining_Level}`;
 
-                // Log the extracted values
-                console.log(characterName);
-                console.log(money);
+                // console.log(characterName);
+                // console.log(money);
+                // console.log(Farming_Level);
             }
 
-            // Call the function with the savedata
             extractAndLogCharacterData(saveData);
+
+            const sendLevelButton = document.getElementById('sendLevelButton'); // Replace with your actual button ID or element
+
+            // Add an event listener to handle click events
+            sendLevelButton.addEventListener('click', () => {
+                sendLevel();
+            });
+
+            function sendLevel() {
+                // Assuming you have a way to accumulate farming experience
+                const farmingExpIncrease = 5; // Increase by 5 for example
+
+                // Update local variable or send a POST request to the server to update Farming_EXP
+                // Example using fetch API for sending POST request
+                fetch('http://localhost:3000/update-farming-exp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ expIncrease: farmingExpIncrease, fileName: characterName})
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Check if level up is needed
+                        if (data.levelUp) {
+                            alert(`Congratulations! You leveled up your Farming skill to level ${data.newLevel}`);
+                            // Perform any UI updates or additional logic for leveling up
+                        } else {
+                            console.log('Farming EXP increased successfully.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Handle error scenarios
+                    });
+            }
         });
     </script>
 </body>

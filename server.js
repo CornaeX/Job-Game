@@ -35,7 +35,7 @@ app.post('/create-character', (req, res) => {
         return res.status(400).send('Character name already exists');
     }
 
-    const fileContent = `Character_Name: ${characterName}\nMoney: 1000  `;
+    const fileContent = `Character_Name: ${characterName}\nMoney: 1000\nInventory: [AppleSeed-10 ,CarrotSeed-10 ,TomatoSeed-10]`;
 
     fs.writeFile(filePath, fileContent, (err) => {
         if (err) {
@@ -54,10 +54,41 @@ app.get('/list-saves', (req, res) => {
         const saveFiles = files.map(file => {
             const filePath = path.join(saveGameDirectory, file);
             const content = fs.readFileSync(filePath, 'utf-8');
-            const [nameLine] = content.split('\n');
+            const lines = content.split('\n');
+            const characterNameLine = lines.find(line => line.startsWith('Character_Name'));
+            const moneyLine = lines.find(line => line.startsWith('Money'));
+            const inventoryLine = lines.find(line => line.startsWith('Inventory'));
+
+            // Extracting character name
+            const characterName = characterNameLine ? characterNameLine.split(': ')[1] : '';
+
+            // Extracting money
+            const money = moneyLine ? parseInt(moneyLine.split(': ')[1], 10) : 0;
+
+            // Extracting inventory
+            let inventory = [];
+            if (inventoryLine) {
+                const inventoryData = inventoryLine.slice(12); // Remove "Inventory: "
+                const items = inventoryData.split(",");
+
+                const itemNamePattern = /(\w+)-(\d+)/;
+                items.forEach(item => {
+                    const match = item.match(itemNamePattern);
+                    if (match) {
+                        const itemName = match[1];
+                        const quantity = parseInt(match[2], 10);
+                        inventory.push({ item: itemName, quantity: quantity });
+                    } else {
+                        console.log("Invalid item format:", item); // Handle invalid formats
+                    }
+                });
+            }
+
             return {
                 fileName: file,
-                characterName: nameLine.split(': ')[1],
+                characterName: characterName,
+                money: money,
+                inventory: inventory,
             };
         });
 
@@ -74,6 +105,59 @@ app.get('/load-save/:fileName', (req, res) => {
 
     const content = fs.readFileSync(filePath, 'utf-8');
     res.send(content);
+});
+
+app.post('/update-farming-exp', (req, res) => {
+    const { expIncrease, fileName} = req.body;
+
+    console.log(expIncrease);
+    console.log(fileName);
+
+    const FileName = `${fileName}.save`; // Replace with actual file name
+    const filePath = path.join(saveGameDirectory, FileName);
+
+    console.log(FileName);
+
+    fs.readFile(filePath, 'utf-8', (err, data) => {
+        if (err) {
+            console.error('Failed to read save file:', err);
+            return res.status(500).send('Failed to read save file');
+        }
+
+        const lines = data.split('\n');
+        let farmingExp = 0;
+
+        lines.forEach(line => {
+            if (line.startsWith('Farming_EXP:')) {
+                farmingExp = parseInt(line.split('Farming_EXP: ')[1].trim(), 10);
+                farmingExp += expIncrease; // Increase by the specified amount
+                line = `Farming_EXP: ${farmingExp}`;
+            }
+        });
+
+        // Check if enough EXP for level up
+        const farmingLevel = 1;
+        const expToLevelUp = farmingLevel * 50; // Example: 50 EXP per level
+
+        let levelUp = false;
+        let newLevel = farmingLevel;
+
+        if (farmingExp >= expToLevelUp) {
+            newLevel++; // Increment level
+            levelUp = true;
+        }
+
+        // Save updated data back to the file
+        const updatedData = lines.join('\n');
+        fs.writeFile(filePath, updatedData, (err) => {
+            if (err) {
+                console.error('Failed to update save file:', err);
+                return res.status(500).send('Failed to update save file');
+            }
+
+            res.json({ levelUp: levelUp, newLevel: newLevel });
+        });
+    });
 });
 
 app.listen(PORT, () => {

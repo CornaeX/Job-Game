@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job's Game</title>
+    <title>Farm</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="test.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/MyFarm.css">
 </head>
 
 <body>
@@ -15,7 +15,7 @@
             <div class="main-header" style="justify-content: center;">
                 <h1>Job's Game</h1>
             </div>
-            <a href="#"><i class="fas fa-home"></i> Home</a>
+            <a href="GameHomePage.html"><i class="fas fa-home"></i> Home</a>
             <a href="#"><i class="fas fa-user"></i> My Profile</a>
             <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
@@ -75,10 +75,59 @@
                 </div>
             </div>
             <div class="status-bar">
-                <p id="cash">Money: $1000</p>
+                <p id="cash">Money: $0</p>
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('seedSelect-container').addEventListener('click', function () {
+            document.getElementById('select-seed-tab').style.display = 'block';
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const saveData = localStorage.getItem('saveData');
+            if (saveData) {
+                console.log(saveData);
+
+            } else {
+                alert('No save data found.');
+            }
+
+            function extractAndLogCharacterData(data) {
+                // Split the savedata into lines
+                const lines = data.split('\n');
+
+                // Initialize variables to hold the extracted values
+                let characterName = '';
+                let money = 0;
+
+                // Loop through each line and extract the relevant data
+                lines.forEach(line => {
+                    if (line.startsWith('Character_Name:')) {
+                        characterName = line.split('Character_Name: ')[1].trim();
+                    }
+                    if (line.startsWith('Money:')) {
+                        money = parseInt(line.split('Money: ')[1].trim(), 10);
+                    }
+                });
+
+                const UID = document.getElementById('username');
+                const Cash = document.getElementById('cash');
+
+                UID.textContent = `${characterName} Farm`;
+                Cash.textContent = `Money $${money}`;
+
+
+                // Log the extracted values
+                console.log(characterName);
+                console.log(money);
+            }
+
+            // Call the function with the savedata
+            extractAndLogCharacterData(saveData);
+
+        });
+    </script>
 </body>
 
 </html>
