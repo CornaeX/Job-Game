@@ -161,11 +161,11 @@ body {
     animation: loading 3s linear infinite;
 }
 
-@keyframes loading {
+/* @keyframes loading {
     0% {
         width: 0;
     }
     100% {
         width: 100%;
     }
-}
+} */

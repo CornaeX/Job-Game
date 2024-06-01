@@ -108,7 +108,7 @@ app.get('/load-save/:fileName', (req, res) => {
 });
 
 app.post('/update-farming-exp', (req, res) => {
-    const { expIncrease, fileName ,farmingLevel} = req.body;
+    const { expIncrease, fileName, farmingLevel } = req.body;
 
     const FileName = `${fileName}.save`; // Replace with actual file name
     const filePath = path.join(saveGameDirectory, FileName);
@@ -120,15 +120,17 @@ app.post('/update-farming-exp', (req, res) => {
         }
 
         let farmingExp = 0;
+        let updatedData = data; // Store the initial data read from the file
 
-        const updatedData = data.split('\n').map(line => {
+        // Process each line to update farming experience
+        const lines = data.split('\n');
+        lines.forEach(line => {
             if (line.startsWith('Farming_EXP:')) {
                 farmingExp = parseInt(line.split('Farming_EXP: ')[1].trim(), 10);
                 farmingExp += expIncrease; // Increase by the specified amount
-                line = `Farming_EXP: ${farmingExp}`;
+                updatedData = updatedData.replace(line, `Farming_EXP: ${farmingExp}`);
             }
-            return line;
-        }).join('\n');
+        });
 
         // Check if enough EXP for level up
         const expToLevelUp = farmingLevel * 50; // Example: 50 EXP per level
@@ -139,6 +141,21 @@ app.post('/update-farming-exp', (req, res) => {
         if (farmingExp >= expToLevelUp) {
             newLevel++; // Increment level
             levelUp = true;
+
+            // Modify updatedData to reflect the increased farming level
+            const lines = updatedData.split('\n');
+            lines.forEach((line, index) => {
+                if (line.startsWith('Farming_Level:')) {
+                    const currentLevel = parseInt(line.split('Farming_Level: ')[1].trim(), 10);
+                    lines[index] = `Farming_Level: ${currentLevel + 1}`;
+                }
+                if (line.startsWith('Farming_EXP:')) {
+                    lines[index] = 'Farming_EXP: 0';
+                }
+            });
+
+            // Join the modified lines back into updatedData
+            updatedData = lines.join('\n');
         }
 
         // Save updated data back to the file

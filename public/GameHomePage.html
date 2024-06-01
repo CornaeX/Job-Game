@@ -94,7 +94,7 @@
                     <img src="img/icon/Farm.png">
                     <p id="farming_Level">Farming<br>Level ?</p>
                     <div class="loading-container">
-                        <div class="loading-bar"></div>
+                        <div class="loading-bar" id="loadingBar"></div>
                     </div>
                 </div>
                 <div class="skill">
@@ -141,8 +141,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             let characterName = '';
+            let saveData = localStorage.getItem('saveData');
+            let Farming_Level, Farming_EXP, Fishing_Level, Fishing_EXP, OreMiner_Level, OreMiner_EXP, Cooking_Level, Cooking_EXP, Cashier_Level, Cashier_EXP, CryptoMining_Level, CryptoMining_EXP;
 
-            const saveData = localStorage.getItem('saveData');
             if (saveData) {
                 console.log(saveData);
             } else {
@@ -160,24 +161,17 @@
                     if (line.startsWith('Money:')) {
                         money = parseInt(line.split('Money: ')[1].trim(), 10);
                     }
-                    if (line.startsWith('Farming_Level:')) {
-                        Farming_Level = parseInt(line.split('Farming_Level: ')[1].trim(), 10);
-                    }
-                    if (line.startsWith('Fishing_Level:')) {
-                        Fishing_Level = parseInt(line.split('Fishing_Level: ')[1].trim(), 10);
-                    }
-                    if (line.startsWith('OreMiner_Level:')) {
-                        OreMiner_Level = parseInt(line.split('OreMiner_Level: ')[1].trim(), 10);
-                    }
-                    if (line.startsWith('Cooking_Level:')) {
-                        Cooking_Level = parseInt(line.split('Cooking_Level: ')[1].trim(), 10);
-                    }
-                    if (line.startsWith('Cashier_Level:')) {
-                        Cashier_Level = parseInt(line.split('Cashier_Level: ')[1].trim(), 10);
-                    }
-                    if (line.startsWith('CryptoMining_Level:')) {
-                        CryptoMining_Level = parseInt(line.split('CryptoMining_Level: ')[1].trim(), 10);
-                    }
+                    const lineTypes = ['Farming', 'Fishing', 'OreMiner', 'Cooking', 'Cashier', 'CryptoMining'];
+
+                    lineTypes.forEach(type => {
+                        if (line.startsWith(`${type}_Level:`)) {
+                            const value = parseInt(line.split(`${type}_Level:`)[1].trim(), 10);
+                            eval(`${type}_Level = value;`);
+                        } else if (line.startsWith(`${type}_EXP:`)) {
+                            const value = parseInt(line.split(`${type}_EXP:`)[1].trim(), 10);
+                            eval(`${type}_EXP = value;`);
+                        }
+                    });
                 });
 
                 const username = document.getElementById('username');
@@ -198,51 +192,59 @@
                 cashier_Level.innerHTML = `Cashier <br> Level ${Cashier_Level}`;
                 cryptoMining_Level.innerHTML = `Crypto Mining <br> Level ${CryptoMining_Level}`;
 
-                // console.log(characterName);
-                // console.log(money);
-                // console.log(Farming_Level);
+                const expToLevelUp = Farming_Level * 50;
+                const progressPercentage = (Farming_EXP / expToLevelUp) * 100;
+                loadingBar.style.width = `${progressPercentage}%`;
+
+                console.log(Farming_EXP);
+                console.log(`Farming_EXP: ${Farming_EXP}`);
+                console.log(`EXP to Level Up: ${expToLevelUp}`);
+                console.log(`Progress: ${progressPercentage}%`);
             }
 
             extractAndLogCharacterData(saveData);
 
-            const sendLevelButton = document.getElementById('sendLevelButton'); // Replace with your actual button ID or element
+            const sendLevelButton = document.getElementById('sendLevelButton');
 
-            // Add an event listener to handle click events
             sendLevelButton.addEventListener('click', () => {
                 sendLevel();
             });
 
-            function sendLevel() {
-                // Assuming you have a way to accumulate farming experience
-                const farmingExpIncrease = 5; // Increase by 5 for example
+            async function sendLevel() {
+                const farmingExpIncrease = 5; // Example: Increase farming experience by 5
 
-                // Update local variable or send a POST request to the server to update Farming_EXP
-                // Example using fetch API for sending POST request
-
-                fetch('http://localhost:3000/update-farming-exp', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ expIncrease: farmingExpIncrease, fileName: characterName, farmingLevel: Farming_Level})
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Check if level up is needed
-                        if (data.levelUp) {
-                            alert(`Congratulations! You leveled up your Farming skill to level ${data.newLevel}`);
-                            // Perform any UI updates or additional logic for leveling up
-                        } else {
-                            console.log('Farming EXP increased successfully.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        // Handle error scenarios
+                try {
+                    const updateResponse = await fetch('http://localhost:3000/update-farming-exp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ expIncrease: farmingExpIncrease, fileName: characterName, farmingLevel: Farming_Level })
                     });
+
+                    const updateData = await updateResponse.json();
+
+                    if (updateData.levelUp) {
+                        alert(`Congratulations! You leveled up your Farming skill to level ${updateData.newLevel}`);
+                    } else {
+                        console.log('Farming EXP increased successfully.');
+                    }
+
+                    // Fetch the updated save data
+                    const saveResponse = await fetch(`http://localhost:3000/load-save/${characterName}.save`);
+                    const updatedSaveData = await saveResponse.text();
+
+                    // Update the UI with the new save data
+                    extractAndLogCharacterData(updatedSaveData);
+                    localStorage.setItem('saveData', updatedSaveData); // Optionally, update localStorage with new save data
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating farming experience.');
+                }
             }
         });
     </script>
+
 </body>
 
 </html>
