@@ -218,12 +218,13 @@
 
                 // Update local variable or send a POST request to the server to update Farming_EXP
                 // Example using fetch API for sending POST request
+
                 fetch('http://localhost:3000/update-farming-exp', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ expIncrease: farmingExpIncrease, fileName: characterName})
+                    body: JSON.stringify({ expIncrease: farmingExpIncrease, fileName: characterName, farmingLevel: Farming_Level})
                 })
                     .then(response => response.json())
                     .then(data => {

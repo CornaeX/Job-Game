@@ -108,15 +108,10 @@ app.get('/load-save/:fileName', (req, res) => {
 });
 
 app.post('/update-farming-exp', (req, res) => {
-    const { expIncrease, fileName} = req.body;
-
-    console.log(expIncrease);
-    console.log(fileName);
+    const { expIncrease, fileName ,farmingLevel} = req.body;
 
     const FileName = `${fileName}.save`; // Replace with actual file name
     const filePath = path.join(saveGameDirectory, FileName);
-
-    console.log(FileName);
 
     fs.readFile(filePath, 'utf-8', (err, data) => {
         if (err) {
@@ -124,19 +119,18 @@ app.post('/update-farming-exp', (req, res) => {
             return res.status(500).send('Failed to read save file');
         }
 
-        const lines = data.split('\n');
         let farmingExp = 0;
 
-        lines.forEach(line => {
+        const updatedData = data.split('\n').map(line => {
             if (line.startsWith('Farming_EXP:')) {
                 farmingExp = parseInt(line.split('Farming_EXP: ')[1].trim(), 10);
                 farmingExp += expIncrease; // Increase by the specified amount
                 line = `Farming_EXP: ${farmingExp}`;
             }
-        });
+            return line;
+        }).join('\n');
 
         // Check if enough EXP for level up
-        const farmingLevel = 1;
         const expToLevelUp = farmingLevel * 50; // Example: 50 EXP per level
 
         let levelUp = false;
@@ -148,8 +142,7 @@ app.post('/update-farming-exp', (req, res) => {
         }
 
         // Save updated data back to the file
-        const updatedData = lines.join('\n');
-        fs.writeFile(filePath, updatedData, (err) => {
+        fs.writeFile(filePath, updatedData, 'utf-8', (err) => {
             if (err) {
                 console.error('Failed to update save file:', err);
                 return res.status(500).send('Failed to update save file');
