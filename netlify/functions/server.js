@@ -22,7 +22,7 @@ if (!fs.existsSync(saveGameDirectory)) {
     fs.mkdirSync(saveGameDirectory);
 }
 
-app.post('/create-character', (req, res) => {
+app.post('/.netlify/functions/server/create-character', (req, res) => {
     const { characterName } = req.body;
     if (!characterName) {
         return res.status(400).send('Character name is required');
@@ -45,7 +45,7 @@ app.post('/create-character', (req, res) => {
     });
 });
 
-app.get('/list-saves', (req, res) => {
+app.get('/.netlify/functions/server/list-saves', (req, res) => {
     fs.readdir(saveGameDirectory, (err, files) => {
         if (err) {
             return res.status(500).send('Failed to list files');
@@ -96,7 +96,7 @@ app.get('/list-saves', (req, res) => {
     });
 });
 
-app.get('/load-save/:fileName', (req, res) => {
+app.get('/.netlify/functions/server/load-save/:fileName', (req, res) => {
     const { fileName } = req.params;
     const filePath = path.join(saveGameDirectory, fileName);
     if (!fs.existsSync(filePath)) {
@@ -107,7 +107,7 @@ app.get('/load-save/:fileName', (req, res) => {
     res.send(content);
 });
 
-app.post('/update-farming-exp', (req, res) => {
+app.post('/.netlify/functions/server/update-farming-exp', (req, res) => {
     const { expIncrease, fileName, farmingLevel } = req.body;
 
     const FileName = `${fileName}.save`; // Replace with actual file name

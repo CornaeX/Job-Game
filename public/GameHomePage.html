@@ -214,7 +214,7 @@
                 const farmingExpIncrease = 5; // Example: Increase farming experience by 5
 
                 try {
-                    const updateResponse = await fetch('http://localhost:3000/update-farming-exp', {
+                    const updateResponse = await fetch('https://jobs-game.netlify.app/.netlify/functions/server/update-farming-exp', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -231,7 +231,7 @@
                     }
 
                     // Fetch the updated save data
-                    const saveResponse = await fetch(`http://localhost:3000/load-save/${characterName}.save`);
+                    const saveResponse = await fetch(`https://jobs-game.netlify.app/.netlify/functions/server/load-save/${characterName}.save`);
                     const updatedSaveData = await saveResponse.text();
 
                     // Update the UI with the new save data
