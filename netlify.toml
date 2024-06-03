@@ -1,4 +1,8 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
 [[redirects]]
-  from = "/*"
-  to = "/public/HomePage.html"
+  from = "/"
+  to = "/HomePage.html"
   status = 200
