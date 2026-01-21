@@ -1,4 +1,5 @@
-body {
+html, body {
+    height: 100%;
     background-color: #0e0e0e;
     color: #fff;
     font-family: Arial, sans-serif;
@@ -8,7 +9,7 @@ body {
 
 body::-webkit-scrollbar {
     display: none;
-  }
+}
 
 .header {
     display: flex;
@@ -35,7 +36,7 @@ body::-webkit-scrollbar {
     padding: 5px 10px;
     margin-right: 40px;
     height: 30px;
-    width: 70px;
+    width: auto;
     border: 1px solid #444;
     border-radius: 5px;
     cursor: pointer;
@@ -78,11 +79,30 @@ body::-webkit-scrollbar {
 }
 
 .plant {
+    position: relative;
+    text-align: center;
     background-color: #5a5a5a;
     color: #fff;
     border: none;
     padding: 20px;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 520px;
+    height: 258px;
+
+}
+
+.plant img {
+    width: 180px;
+    height: 180px;
+    margin-top: 10px;
+}
+
+.plant-text {
+    font-size: 16px;
+    margin-bottom: 10px;
 }
 
 .buy-more-seeds, .expand-farm {
@@ -125,6 +145,7 @@ body::-webkit-scrollbar {
     right: 50px;
     width: 200px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 10; /* Ensure it's on top */
 }
 
 .status-bar {
@@ -132,8 +153,8 @@ body::-webkit-scrollbar {
     padding: 15px;
     position: fixed;
     bottom: 0;
-    left: 0px;
-    width: calc(100% - 0px);
+    left: 295px;
+    width: calc(100% - 250px);
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: space-between;
@@ -148,7 +169,7 @@ body::-webkit-scrollbar {
 
 .container {
     display: flex;
-    width: 100%;
+    height: 100%;
 }
 
 .navigation {
@@ -199,10 +220,113 @@ body::-webkit-scrollbar {
 }
 
 .main-content {
-    flex-grow: 1;
+    flex: 1;
     padding: 20px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     scrollbar-width: none;
+}
+
+.seed-select-button {
+    color: white;
+    background: #7a7a7a;
+    border-radius: 10px;
+    cursor: pointer;
+    border-color: #6b6b6b;
+    height: 35px;
+}
+
+.seed-select-button:hover {
+    background: #888888;
+}
+
+.loading-bar {
+    width: 100%;
+    height: 5px;
+    background-color: #e0e0e0;
+    margin-top: 5px;
+    overflow: hidden;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.loading-bar-progress {
+    height: 100%;
+    width: 0;
+    background-color: #76c7c0;
+    animation: loading 2s linear forwards;
+    transition: width 1.5s ease;
+    /* display: none; */
+}
+
+/* @keyframes loading {
+    from {
+        width: 0%;
+    }
+    to {
+        width: 100%;
+    }
+} */
+
+.ErrorDiv {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: red;
+    font-size: 50px;
+    background-color: #7a7a7a;
+    height: 80px;
+    padding-left: 30px;
+    padding-right: 30px;
+    border: 3px solid #444;
+    border-radius: 10px;
+}
+
+.notification-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9); /* Start slightly smaller for pop effect */
+    
+    background-color: rgba(0, 0, 0, 0.9); /* Dark background */
+    color: white;
+    padding: 20px 40px;
+    border-radius: 15px;
+    
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    z-index: 9999;
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy animation */
+    pointer-events: none; /* Click through when hidden */
+}
+
+/* State: Visible */
+.notification-popup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1); /* Scale up to normal */
+}
+
+/* Variant: Error */
+.notification-popup.error {
+    border: 3px solid #ff5252;
+    color: #ff5252;
+}
+
+/* Variant: Success (for Level Up) */
+.notification-popup.success {
+    border: 3px solid #4CAF50;
+    color: #4CAF50;
 }

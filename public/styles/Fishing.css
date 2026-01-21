@@ -1,0 +1,316 @@
+html, body {
+    height: 100%;
+    background-color: #0e0e0e;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #282828;
+    border-bottom: 1px solid #444;
+}
+
+.back-button {
+    background-color: #444;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 40px;
+    height: 40px;
+    width: 80px;
+    cursor: pointer;
+}
+
+.seedSelect-container {
+    background-color: #282828;
+    padding: 5px 10px;
+    margin-right: 40px;
+    height: 30px;
+    width: auto;
+    border: 1px solid #444;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seedSelect-container span {
+    text-align: center;
+}
+
+.content {
+    padding: 20px 0px 20px 0px;
+}
+
+.select-seed-tab {
+    border: 1px solid #ccc;
+    padding: 20px;
+    background-color: #5a5a5a;
+    position: absolute;
+    top: 100px;
+    right: 50px;
+    width: 200px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 10; /* Ensure it's on top */
+}
+
+.status-bar {
+    background-color: #2b2b2b;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    left: 295px;
+    width: calc(100% - 250px);
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+}
+
+.status-bar p {
+    margin: 0;
+    color: #ffffff;
+}
+
+.container {
+    display: flex;
+    height: 100%;
+}
+
+.navigation {
+    width: 250px;
+    background-color: #2b2b2b;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.navigation::-webkit-scrollbar {
+    display: none;
+}
+
+.navigation a {
+    color: #d1d1d1;
+    text-decoration: none;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    transition: background 0.3s, transform 0.3s;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.navigation a:last-child {
+    border-bottom: none;
+}
+
+.navigation a:hover {
+    background-color: #3a3a3a;
+    transform: translateX(5px);
+}
+
+.navigation i {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.seed-select-button {
+    color: white;
+    background: #7a7a7a;
+    border-radius: 10px;
+    cursor: pointer;
+    border-color: #6b6b6b;
+    height: 35px;
+}
+
+.seed-select-button:hover {
+    background: #888888;
+}
+
+.ErrorDiv {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: red;
+    font-size: 50px;
+    background-color: #7a7a7a;
+    height: 80px;
+    padding-left: 30px;
+    padding-right: 30px;
+    border: 3px solid #444;
+    border-radius: 10px;
+}
+
+/* ---------------------------------------------------------------------------------------------------------- */
+
+.fishing-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center align items horizontally */
+    height: 60vh; /* Full viewport height */
+    position: relative; /* Set as relative to position children absolutely */
+}
+
+.fish-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Remove pointer-events: none to allow interaction with the fish */
+    /* pointer-events: none; */
+}
+
+.pond-image {
+    width: 900px;
+    height: auto; /* Adjust height to maintain aspect ratio */
+}
+
+.pond-container {
+    position: relative; /* Ensure it's positioned relative for child absolute positioning */
+    width: 900px; /* Or your preferred width */
+    height: auto; /* Or your preferred height */
+}
+
+.fish-container {
+    position: absolute; /* Absolute to allow fishImage to move within it */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#fishImage {
+    position: absolute; /* Absolute positioning to move the fish within .fish-container */
+    width: 110px; /* Small size for the fish image */
+    height: auto;
+    cursor: pointer; /* Show a pointer cursor */
+    z-index: 10; /* Ensure it's on top of other elements */
+}
+
+/* Optional keyframes for continuous fading, but we'll use JavaScript for control */
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+#bar {
+    width: 300px;
+    height: 30px;
+    background-color: #ccc;
+    position: relative;
+    margin: -10px auto; /* Center bar */
+    display: block; /* Ensure bar is displayed */
+}
+
+#line {
+    width: 5px;
+    height: 30px;
+    background-color: red;
+    position: absolute;
+    left: 0;
+    animation: moveLine 2s linear infinite alternate;
+    display: block;
+}
+
+#target {
+    height: 30px;
+    background-color: blue;
+    position: absolute;
+    top: 0;
+    display: block;
+}
+
+@keyframes moveLine {
+    0% { left: 0; }
+    100% { left: 295px; }
+}
+
+.catch-button-dark {
+    display: block; /* Ensure button is displayed */
+    width: 80px;
+    height: 80px;
+    background-color: rgba(0, 128, 0, 0.466);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    text-align: center;
+    line-height: 80px; /* Center text vertically */
+    margin-top: 40px; /* Space between bar and button */
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Optional shadow for better visibility */
+    position: relative; /* Ensure the button is positioned relative to the .fishing-game */
+    /* Center button horizontally within its container */
+    margin-left: auto; /* Center horizontally using margin auto */
+    margin-right: auto; /* Center horizontally using margin auto */
+    transition: background-color 0.3s ease;
+}
+
+.catch-button {
+    display: block; /* Ensure button is displayed */
+    width: 80px;
+    height: 80px;
+    background-color: #00cc00;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    text-align: center;
+    line-height: 80px; /* Center text vertically */
+    margin-top: 30px; /* Space between bar and button */
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Optional shadow for better visibility */
+    position: relative; /* Ensure the button is positioned relative to the .fishing-game */
+    /* Center button horizontally within its container */
+    margin-left: auto; /* Center horizontally using margin auto */
+    margin-right: auto; /* Center horizontally using margin auto */
+    transition: background-color 0.3s ease;
+}
+
+#message {
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 1s ease-out; /* Adjust timing as needed */
+}

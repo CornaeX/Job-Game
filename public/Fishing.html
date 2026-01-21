@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pond</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles/Fishing.css">
+    <script src="scripts/cheats.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="ErrorDiv" id="Error">asdasd</div>
+        <div class="navigation">
+            <div class="main-header" style="justify-content: center;">
+                <h1>Job's Game</h1>
+            </div>
+            <a href="/home"><i class="fas fa-home"></i> Home</a>
+            <a href="#"><i class="fas fa-user"></i> My Profile</a>
+            <a href="/create-character" id="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <button class="back-button" onclick="window.location.href='/home'">Back</button>
+                <h1 id="username">Pond</h1>
+                <div id="seedSelect-container" class="seedSelect-container">
+                    <span id="seedCountElement">Fishing bait</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <div id="select-seed-tab" class="select-seed-tab" style="display: none;">
+                    <h2>Fishing bait</h2>
+                    <p>Choose the baits you want to use.</p>
+                    <div class="seed-option" id="seed-option">
+
+                    </div>
+                </div>
+
+                <div class="content">
+                    <div id="message" style="position: absolute; "></div>
+                    <div class="fishing-game">
+                        <div class="pond-container">
+                            <img src="img/Fishing/waterBG.jpg" class="pond-image">
+                            <div class="fish-container">
+                                <img src="img/Fishing/Fish.png" id="fishImage">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Move the mini-game container here -->
+                    <div id="bar" style=" display: none;">
+                        <div id="line" style=" display: none;"></div>
+                        <div id="target" style=" display: none;"></div>
+                    </div>
+                    <button class="catch-button-dark" id="catchButtonDark" style=" display: none;">Catch!</button>
+                    <button class="catch-button" id="catchButton" style=" display: none;">Catch!</button>
+                </div>
+
+            </div>
+            <div class="status-bar">
+                <p id="cash">Money: $0</p>
+            </div>
+        </div>
+    </div>
+    <script>
+    let characterName = localStorage.getItem('characterName');
+    console.log(characterName);
+
+    document.getElementById('seedSelect-container').addEventListener('click', function () {
+        if (document.getElementById('select-seed-tab').style.display === 'block') {
+            document.getElementById('select-seed-tab').style.display = 'none';
+        } else {
+            document.getElementById('select-seed-tab').style.display = 'block';
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        function updateUI(characterName, money) {
+            const UID = document.getElementById('username');
+            const Cash = document.getElementById('cash');
+            UID.textContent = `${characterName} Farm`;
+            Cash.textContent = `Money $${money}`;
+            console.log(characterName, money);
+        }
+
+        function updateSeedUI(seed) {
+            const SeedPanel = document.getElementById('seed-option');
+            const bait = ["Worms", "Lures", "Minnow"];
+            seed.forEach(function (item) {
+                var parts = item.split('-');
+                var seedType = parts[0];
+                var seedCount = parts[1];
+                if (seedCount > 0 && bait.includes(seedType)) {
+                    var button = document.createElement('button');
+                    button.className = 'seed-select-button';
+                    button.setAttribute('type', 'button');
+                    button.setAttribute('onclick', `selectSeed('${seedType}', ${seedCount})`);
+                    button.setAttribute('id', `${seedType}`);
+                    button.textContent = `${seedType}: ${seedCount}`;
+                    SeedPanel.appendChild(button);
+                }
+            });
+        }
+
+        async function fetchCharacterData(characterName) {
+            try {
+                const response = await fetch(`/get-character-data?characterName=${characterName}`);
+                if (!response.ok) throw new Error('Failed to fetch save data');
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while fetching save data.');
+            }
+        }
+
+        async function fetchCharacterInvData(characterName) {
+            try {
+                const response = await fetch(`/load-inventory/${characterName}`);
+                if (!response.ok) throw new Error('Failed to fetch save data');
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while fetching save data.');
+            }
+        }
+
+        const updatedSaveData = await fetchCharacterData(characterName);
+        if (updatedSaveData) updateUI(updatedSaveData.Character_Name, updatedSaveData.Money);
+
+        const updatedSaveInvData = await fetchCharacterInvData(characterName);
+        if (updatedSaveInvData) updateSeedUI(updatedSaveInvData);
+    });
+
+    function selectSeed(seedType, seedCount) {
+        const span_seed = document.getElementById('seedCountElement');
+        span_seed.textContent = `${seedType}: ${seedCount}`;
+        document.getElementById('select-seed-tab').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const fishImage = document.getElementById('fishImage');
+        const catchButton = document.getElementById('catchButton');
+        const catchButtonDark = document.getElementById('catchButtonDark');
+        const message = document.getElementById('message');
+        const line = document.getElementById('line');
+        const target = document.getElementById('target');
+        const bar = document.getElementById('bar');
+        let targetPosition;
+        let success = false;
+        let gameTimeout;
+        let isMiniGameStarted = false;
+
+        function getRandomPosition() {
+            const pondContainer = document.querySelector('.pond-container');
+            const pondWidth = pondContainer.offsetWidth;
+            const pondHeight = pondContainer.offsetHeight;
+            const fishWidth = fishImage.offsetWidth;
+            const fishHeight = fishImage.offsetHeight;
+            const maxX = pondWidth - fishWidth;
+            const maxY = pondHeight - fishHeight;
+            return { x: Math.random() * maxX, y: Math.random() * maxY };
+        }
+
+        function getRandomFadeDuration() {
+            return Math.random() * 1 + 0.3; // Between 0.3s and 1.3s
+        }
+
+        function showFish() {
+            const { x, y } = getRandomPosition();
+            fishImage.style.left = `${x}px`;
+            fishImage.style.top = `${y}px`;
+            const fadeDuration = getRandomFadeDuration();
+            fishImage.style.transition = `opacity ${fadeDuration}s`;
+            fishImage.style.opacity = 1;
+            setTimeout(() => {
+                fishImage.style.opacity = 0;
+                setTimeout(showFish, fadeDuration * 1000);
+            }, fadeDuration * 1000);
+        }
+
+        fishImage.addEventListener('click', () => {
+            fishImage.style.display = 'none';
+            catchButtonDark.style.display = 'block';
+            waitForCursorOnCatchButton(); // Wait for cursor to hover over the button
+        });
+
+        function waitForCursorOnCatchButton() {
+            catchButtonDark.addEventListener('mouseover', function handler() {
+                catchButtonDark.style.display = 'none';
+                catchButton.style.display = 'block';
+                if (!isMiniGameStarted) {
+                    isMiniGameStarted = true;
+                    showMiniGame(); // Start the mini-game
+                }
+                // Remove the event listener after the first hover
+                catchButton.removeEventListener('mouseover', handler);
+            });
+        }
+
+        catchButton.addEventListener('click', () => {
+            clearTimeout(gameTimeout);
+            const lineRect = line.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const detectionMargin = 5;
+
+            if (
+                lineRect.left + detectionMargin >= targetRect.left &&
+                lineRect.right - detectionMargin <= targetRect.right
+            ) {
+                message.textContent = "Success! You caught a fish!";
+                success = true;
+            } else {
+                message.textContent = "You missed the fish.";
+            }
+
+            setTimeout(() => {
+                message.classList.add('fade-out');
+            }, 2000);
+            message.classList.remove('fade-out');
+            hideMiniGame();
+        });
+
+        function showMiniGame() {
+            const targetWidth = Math.random() * 20 + 15;
+            target.style.width = targetWidth + 'px';
+            targetPosition = Math.random() * (300 - targetWidth);
+            target.style.left = targetPosition + 'px';
+
+            success = false;
+            bar.style.display = 'block';
+            line.style.animationPlayState = 'running';
+            bar.style.display = 'block';
+            line.style.display = 'block';
+            target.style.display = 'block';
+
+            gameTimeout = setTimeout(() => {
+                if (!success) {
+                    message.textContent = "Time's up! You didn't catch the fish.";
+                    hideMiniGame();
+                    setTimeout(() => {
+                        message.classList.add('fade-out');
+                    }, 2000);
+                    message.classList.remove('fade-out');
+                }
+            }, 4000);
+        }
+
+        function hideMiniGame() {
+            line.style.animationPlayState = 'paused';
+            bar.style.display = 'none';
+            catchButton.style.display = 'none';
+            fishImage.style.display = 'block';
+            isMiniGameStarted = false; // Reset the flag
+        }
+
+        showFish();
+    });
+
+    const logoutLink = document.getElementById('logout-link');
+    logoutLink.addEventListener('click', () => {
+        localStorage.removeItem('characterName');
+        window.location.href = '/create-character';
+    });
+</script>
+</body>
+
+</html>

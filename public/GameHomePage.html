@@ -15,17 +15,17 @@
             <div class="main-header" on style="justify-content: center;">
                 <h1>Job's Game</h1>
             </div>
-            <a href="GameHomePage.html"><i class="fas fa-home"></i> Home</a>
+            <a href="/home"><i class="fas fa-home"></i> Home</a>
             <a href="#"><i class="fas fa-user"></i> My Profile</a>
-            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            <button style="background-color: red; height: 100px;" id="sendLevelButton"></button>
+            <a href="/create-character" id="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <!-- <button style="background-color: red; height: 100px;" id="sendLevelButton"></button> -->
         </div>
         <div class="main-content">
             <div class="main-header" on>
                 <h1 class="username" id="username">Username</h1>
             </div>
 
-            <div class="section" onclick="window.location.href='MyFarm.html'" style="cursor: pointer;">
+            <div class="section" onclick="window.location.href='/my-farm'" style="cursor: pointer;">
                 <img src="img/icon/Farm.png" style="border-radius: 100%;">
                 <div>
                     <h2>Farm</h2>
@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-            <div class="section">
+            <div class="section" onclick="window.location.href='/fishing'" style="cursor: pointer;">
                 <img src="img/icon/Fishing.png">
                 <div>
                     <h2>Fishing</h2>
@@ -139,40 +139,54 @@
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            let characterName = '';
-            let saveData = localStorage.getItem('saveData');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            let characterName = localStorage.getItem('characterName');
+            console.log(characterName);
+
             let Farming_Level, Farming_EXP, Fishing_Level, Fishing_EXP, OreMiner_Level, OreMiner_EXP, Cooking_Level, Cooking_EXP, Cashier_Level, Cashier_EXP, CryptoMining_Level, CryptoMining_EXP;
 
-            if (saveData) {
-                console.log(saveData);
-            } else {
-                alert('No save data found.');
+            if (!characterName) {
+                alert('Character name not found.');
+                return;
+            }
+
+            try {
+                // Fetch data from the server
+                const response = await fetch(`/get-character-data?characterName=${characterName}`);
+                const data = await response.json();
+
+                if (!data) {
+                    alert('No character data found.');
+                    return;
+                }
+
+                extractAndLogCharacterData(data);
+            } catch (error) {
+                console.error('Error fetching character data:', error);
+                alert('An error occurred while fetching character data.');
+                return;
             }
 
             function extractAndLogCharacterData(data) {
-                const lines = data.split('\n');
-                let money = 0;
+                ({
+                    Character_Name,
+                    Money,
+                    Farming_Level,
+                    Farming_EXP,
+                    Fishing_Level,
+                    Fishing_EXP,
+                    OreMiner_Level,
+                    OreMiner_EXP,
+                    Cooking_Level,
+                    Cooking_EXP,
+                    Cashier_Level,
+                    Cashier_EXP,
+                    CryptoMining_Level,
+                    CryptoMining_EXP
+                } = data);
 
-                lines.forEach(line => {
-                    if (line.startsWith('Character_Name:')) {
-                        characterName = line.split('Character_Name: ')[1].trim();
-                    }
-                    if (line.startsWith('Money:')) {
-                        money = parseInt(line.split('Money: ')[1].trim(), 10);
-                    }
-                    const lineTypes = ['Farming', 'Fishing', 'OreMiner', 'Cooking', 'Cashier', 'CryptoMining'];
-
-                    lineTypes.forEach(type => {
-                        if (line.startsWith(`${type}_Level:`)) {
-                            const value = parseInt(line.split(`${type}_Level:`)[1].trim(), 10);
-                            eval(`${type}_Level = value;`);
-                        } else if (line.startsWith(`${type}_EXP:`)) {
-                            const value = parseInt(line.split(`${type}_EXP:`)[1].trim(), 10);
-                            eval(`${type}_EXP = value;`);
-                        }
-                    });
-                });
+                console.log(Farming_EXP)
 
                 const username = document.getElementById('username');
                 const cash = document.getElementById('cash');
@@ -183,8 +197,8 @@
                 const cashier_Level = document.getElementById('cashier_Level');
                 const cryptoMining_Level = document.getElementById('cryptoMining_Level');
 
-                username.textContent = `WELCOME ${characterName}`;
-                cash.textContent = `Money $${money}`;
+                username.textContent = `WELCOME ${Character_Name}`;
+                cash.textContent = `Money $${Money}`;
                 farming_Level.innerHTML = `Farming <br> Level ${Farming_Level}`;
                 fishing_Level.innerHTML = `Fishing <br> Level ${Fishing_Level}`;
                 oreMiner_Level.innerHTML = `Ore Miner <br> Level ${OreMiner_Level}`;
@@ -194,55 +208,64 @@
 
                 const expToLevelUp = Farming_Level * 50;
                 const progressPercentage = (Farming_EXP / expToLevelUp) * 100;
+                const loadingBar = document.getElementById('loadingBar');
                 loadingBar.style.width = `${progressPercentage}%`;
 
-                console.log(Farming_EXP);
-                console.log(`Farming_EXP: ${Farming_EXP}`);
-                console.log(`EXP to Level Up: ${expToLevelUp}`);
-                console.log(`Progress: ${progressPercentage}%`);
+                // console.log(Farming_EXP);
+                // console.log(`Farming_EXP: ${Farming_EXP}`);
+                // console.log(`EXP to Level Up: ${expToLevelUp}`);
+                // console.log(`Progress: ${progressPercentage}%`);
             }
 
-            extractAndLogCharacterData(saveData);
-
-            const sendLevelButton = document.getElementById('sendLevelButton');
-
-            sendLevelButton.addEventListener('click', () => {
-                sendLevel();
-            });
+            // const sendLevelButton = document.getElementById('sendLevelButton');
+            // sendLevelButton.addEventListener('click', () => {
+            //     sendLevel();
+            // });
 
             async function sendLevel() {
-                const farmingExpIncrease = 5; // Example: Increase farming experience by 5
+                const farmingExpIncrease = 5;
+
+                // console.log(Farming_Level);
 
                 try {
-                    const updateResponse = await fetch('https://jobs-game.netlify.app/.netlify/functions/server/update-farming-exp', {
+                    const updateResponse = await fetch('/update-farming-exp', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ expIncrease: farmingExpIncrease, fileName: characterName, farmingLevel: Farming_Level })
+                        body: JSON.stringify({ expIncrease: farmingExpIncrease, characterName })
                     });
 
                     const updateData = await updateResponse.json();
 
                     if (updateData.levelUp) {
-                        alert(`Congratulations! You leveled up your Farming skill to level ${updateData.newLevel}`);
-                    } else {
-                        console.log('Farming EXP increased successfully.');
+
                     }
 
-                    // Fetch the updated save data
-                    const saveResponse = await fetch(`https://jobs-game.netlify.app/.netlify/functions/server/load-save/${characterName}.save`);
-                    const updatedSaveData = await saveResponse.text();
+                    // Fetch the updated data
+                    const saveResponse = await fetch(`/get-character-data?characterName=${characterName}`);
+                    const updatedData = await saveResponse.json();
 
-                    // Update the UI with the new save data
-                    extractAndLogCharacterData(updatedSaveData);
-                    localStorage.setItem('saveData', updatedSaveData); // Optionally, update localStorage with new save data
+                    // Update the UI with the new data
+                    extractAndLogCharacterData(updatedData);
                 } catch (error) {
                     console.error('Error:', error);
                     alert('An error occurred while updating farming experience.');
                 }
             }
         });
+
+        const logoutLink = document.getElementById('logout-link');
+
+        // Add click event listener
+        logoutLink.addEventListener('click', function(event) {
+        // Remove specific items from localStorage
+        localStorage.removeItem('characterName');
+
+        // Optionally, redirect to the page after clearing specific data
+        window.location.href = '/create-character';
+        });
+
     </script>
 
 </body>

@@ -1,30 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Farm</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="styles/MyFarm.css">
+    <script src="scripts/cheats.js"></script>
+    <style>
+        /* Small CSS addition for the selection highlight */
+        .seed-select-button.active {
+            border: 2px solid #4CAF50;
+            background-color: #e8f5e9;
+        }
+        .plant:disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
+        <div id="game-notification" class="notification-popup"></div>
+        
         <div class="navigation">
             <div class="main-header" style="justify-content: center;">
                 <h1>Job's Game</h1>
             </div>
-            <a href="GameHomePage.html"><i class="fas fa-home"></i> Home</a>
+            <a href="/home"><i class="fas fa-home"></i> Home</a>
             <a href="#"><i class="fas fa-user"></i> My Profile</a>
-            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="#" id="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
+
         <div class="main-content">
             <div class="header">
-                <button class="back-button" onclick="window.location.href='GameHomePage.html'">Back</button>
+                <button class="back-button" onclick="window.location.href='/home'">Back</button>
                 <h1 id="username">Farm</h1>
                 <div id="seedSelect-container" class="seedSelect-container">
-                    <span>seed (1)</span>
+                    <span id="seedCountElement">Select Seed</span>
                 </div>
             </div>
 
@@ -32,102 +46,425 @@
                 <div id="select-seed-tab" class="select-seed-tab" style="display: none;">
                     <h2>Select Seeds</h2>
                     <p>Choose the seeds you want to plant.</p>
-                    <!-- Add your seed selection options here -->
+                    <div class="seed-option" id="seed-option">
+                        </div>
                 </div>
-                <div class="selected-seeds">
-                    <button class="harvest-button">Harvest All Crops</button>
-                    <button class="plant-button">Plant All Selected</button>
-                </div>
+
                 <div class="plant-area">
-                    <button class="plant">Plant</button>
-                    <button class="plant">Plant</button>
-                    <button class="plant">Plant</button>
-                    <button class="plant">Plant</button>
-                    <button class="plant">Plant</button>
-                    <button class="plant">Plant</button>
-                </div>
-                <div class="buy-more-seeds">
-                    <h2>Buy more Seeds</h2>
-                    <p>From the Country Store in Town</p>
-                </div>
-                <div class="expand-farm">
-                    <h2>EXPAND FARM</h2>
-                    <div class="options">
-                        <div class="option">
-                            <h3>Grow more crops</h3>
-                            <p>Adds another row of crops</p>
-                            <span>1,000 Silver</span>
-                        </div>
-                        <div class="option">
-                            <h3>Add a Workshop</h3>
-                            <p>Allows crafting of new items</p>
-                            <span>1,500 Silver</span>
-                        </div>
-                        <div class="option">
-                            <h3>Farm Supply</h3>
-                            <p>Upgrade & Improve your farm</p>
-                        </div>
-                        <div class="option">
-                            <h3>Farm Settings</h3>
-                            <p>Change farm name, etc.</p>
-                        </div>
-                    </div>
+                    <button id="1" class="plant" onclick="handlePlotClick(this)">
+                        <span class="plant-text">Plant</span>
+                        <img src="img/Crop N Seed Icon/soil.png" class="plant-icon">
+                    </button>
+                    <button id="2" class="plant" onclick="handlePlotClick(this)">
+                        <span class="plant-text">Plant</span>
+                        <img src="img/Crop N Seed Icon/soil.png" class="plant-icon">
+                    </button>
+                    <button id="3" class="plant" onclick="handlePlotClick(this)">
+                        <span class="plant-text">Plant</span>
+                        <img src="img/Crop N Seed Icon/soil.png" class="plant-icon">
+                    </button>
+                    <button id="4" class="plant" onclick="handlePlotClick(this)">
+                        <span class="plant-text">Plant</span>
+                        <img src="img/Crop N Seed Icon/soil.png" class="plant-icon">
+                    </button>
+                    <button id="5" class="plant" onclick="handlePlotClick(this)">
+                        <span class="plant-text">Plant</span>
+                        <img src="img/Crop N Seed Icon/soil.png" class="plant-icon">
+                    </button>
+                    <button id="6" class="plant" onclick="handlePlotClick(this)">
+                        <span class="plant-text">Plant</span>
+                        <img src="img/Crop N Seed Icon/soil.png" class="plant-icon">
+                    </button>
                 </div>
             </div>
+            
             <div class="status-bar">
                 <p id="cash">Money: $0</p>
             </div>
         </div>
     </div>
+
     <script>
-        document.getElementById('seedSelect-container').addEventListener('click', function () {
-            document.getElementById('select-seed-tab').style.display = 'block';
-        });
+        // --- 1. CONFIGURATION & STATE ---
+        const characterName = localStorage.getItem('characterName');
+        
+        // Centralized Crop Data (Easier to edit)
+        const CROP_DATA = {
+            "CarrotSeed":     { result: "carrotCrop",     time: 600,   exp: 5 },
+            "StrawberrySeed": { result: "strawberryCrop", time: 3000,  exp: 7 },
+            "TomatoSeed":     { result: "tomatoCrop",     time: 4800,  exp: 10 },
+            "AppleSeed":      { result: "appleCrop",      time: 7200,  exp: 12 },
+            "KiwiSeed":       { result: "kiwiCrop",       time: 9000,  exp: 14 },
+            "OrangeSeed":     { result: "orangeCrop",     time: 10800, exp: 15 },
+            "CornSeed":       { result: "cornCrop",       time: 15000, exp: 19 },
+            "WheatSeed":      { result: "wheatCrop",      time: 18000, exp: 21 },
+            "PumpkinSeed":    { result: "pumpkinCrop",    time: 22200, exp: 25 }
+        };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const saveData = localStorage.getItem('saveData');
-            if (saveData) {
-                console.log(saveData);
+        // Local State Management (Prevents constant fetching)
+        const gameState = {
+            inventory: {},    // Stores "CarrotSeed": 5
+            selectedSeed: null, // Stores "CarrotSeed"
+            activeCrops: [],   // Stores current growing crops
+            money: 0
+        };
 
-            } else {
-                alert('No save data found.');
+        // --- 2. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!characterName) {
+                window.location.href = '/create-character';
+                return;
             }
 
-            function extractAndLogCharacterData(data) {
-                // Split the savedata into lines
-                const lines = data.split('\n');
+            console.log(`Loading farm for: ${characterName}`);
+            await loadAllGameData();
+            startGlobalGameLoop(); // Start the timer loop
+            
+            // UI Event Listeners
+            document.getElementById('logout-link').addEventListener('click', () => {
+                localStorage.removeItem('characterName');
+                window.location.href = '/create-character';
+            });
 
-                // Initialize variables to hold the extracted values
-                let characterName = '';
-                let money = 0;
+            document.getElementById('seedSelect-container').addEventListener('click', toggleSeedMenu);
+        });
 
-                // Loop through each line and extract the relevant data
-                lines.forEach(line => {
-                    if (line.startsWith('Character_Name:')) {
-                        characterName = line.split('Character_Name: ')[1].trim();
-                    }
-                    if (line.startsWith('Money:')) {
-                        money = parseInt(line.split('Money: ')[1].trim(), 10);
-                    }
+        async function loadAllGameData() {
+            try {
+                // Fetch Character Stats
+                const statsRes = await fetch(`/get-character-data?characterName=${characterName}`);
+                const statsData = await statsRes.json();
+                gameState.money = statsData.Money;
+                updateHeaderUI(statsData.Character_Name, statsData.Money);
+
+                // Fetch Inventory
+                const invRes = await fetch(`/load-inventory/${characterName}`);
+                const invData = await invRes.json();
+                processInventory(invData);
+
+                // Fetch Active Crops
+                const cropsRes = await fetch(`/load-cropType/${characterName}`);
+                const cropsData = await cropsRes.json();
+                processActiveCrops(cropsData);
+
+            } catch (error) {
+                console.error("Game Load Error:", error);
+                showError("Failed to load game data.");
+            }
+        }
+
+        // --- 3. STATE PROCESSORS ---
+        function processInventory(data) {
+            // Convert Array ["CarrotSeed-5", "Item-0"] to Object { "CarrotSeed": 5 }
+            gameState.inventory = {}; 
+            data.forEach(item => {
+                const [name, count] = item.split('-');
+                if (name.includes('Seed')) {
+                    gameState.inventory[name] = parseInt(count, 10);
+                }
+            });
+            renderSeedMenu();
+            updateSelectedSeedUI(); // Refresh the top bar if needed
+        }
+
+        function processActiveCrops(data) {
+            // Clear current tracking
+            gameState.activeCrops = [];
+
+            if (!data.cropType) return;
+
+            for (let i = 0; i < data.cropType.length; i++) {
+                const cropFullStr = data.cropType[i]; // "carrotCrop-1"
+                const [cropName, plotId] = cropFullStr.split('-');
+                
+                const plantTime = new Date(data.plantTime[i].replace(' ', 'T'));
+                const endTime = new Date(data.growEndTime[i].replace(' ', 'T'));
+
+                // Add to local state tracking
+                gameState.activeCrops.push({
+                    id: plotId,
+                    cropName: cropName,
+                    plantTime: plantTime,
+                    endTime: endTime,
+                    finished: false
                 });
 
-                const UID = document.getElementById('username');
-                const Cash = document.getElementById('cash');
+                // Update Visuals
+                const button = document.getElementById(plotId);
+                if (button) {
+                    button.disabled = true;
+                    // Simply set state, the Loop will handle the bar width
+                    button.dataset.state = "growing"; 
+                    button.innerHTML = `
+                        <img src="img/Crop N Seed Icon/${cropName}.png">
+                        <div class="loading-bar"><div class="loading-bar-progress" style="width:0%"></div></div>
+                    `;
+                }
+            }
+        }
 
-                UID.textContent = `${characterName} Farm`;
-                Cash.textContent = `Money $${money}`;
+        // --- 4. UI RENDERING ---
+        function updateHeaderUI(name, money) {
+            document.getElementById('username').textContent = `${name} Farm`;
+            document.getElementById('cash').textContent = `Money: $${money}`;
+        }
 
+        function renderSeedMenu() {
+            const container = document.getElementById('seed-option');
+            container.innerHTML = ''; // Clear existing
 
-                // Log the extracted values
-                console.log(characterName);
-                console.log(money);
+            Object.keys(gameState.inventory).forEach(seedName => {
+                const count = gameState.inventory[seedName];
+                if (count > 0) {
+                    const btn = document.createElement('button');
+                    btn.className = 'seed-select-button';
+                    if (gameState.selectedSeed === seedName) btn.classList.add('active');
+                    btn.textContent = `${seedName}: ${count}`;
+                    btn.onclick = () => selectSeed(seedName);
+                    container.appendChild(btn);
+                }
+            });
+        }
+
+        function toggleSeedMenu() {
+            const menu = document.getElementById('select-seed-tab');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function selectSeed(seedName) {
+            gameState.selectedSeed = seedName;
+            updateSelectedSeedUI();
+            renderSeedMenu(); // Re-render to highlight selection
+            document.getElementById('select-seed-tab').style.display = 'none'; // Close menu
+        }
+
+        function updateSelectedSeedUI() {
+            const display = document.getElementById('seedCountElement');
+            if (gameState.selectedSeed && gameState.inventory[gameState.selectedSeed] > 0) {
+                display.textContent = `${gameState.selectedSeed}: ${gameState.inventory[gameState.selectedSeed]}`;
+            } else {
+                display.textContent = "Select Seed";
+                gameState.selectedSeed = null;
+            }
+        }
+
+        function showNotification(message, type = 'neutral') {
+            const notifEl = document.getElementById('game-notification');
+            
+            // Set text
+            notifEl.textContent = message;
+            
+            // Reset classes (keep base class)
+            notifEl.className = 'notification-popup';
+            
+            // Add specific style (error or success)
+            if (type === 'error') notifEl.classList.add('error');
+            if (type === 'success') notifEl.classList.add('success');
+            
+            // Trigger Animation (Add 'show' class)
+            // Small timeout ensures the browser registers the class reset first
+            requestAnimationFrame(() => {
+                notifEl.classList.add('show');
+            });
+        
+            // Hide after 2 seconds
+            setTimeout(() => {
+                notifEl.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Wrapper for your existing code to use
+        function showError(msg) {
+            showNotification(msg, 'error');
+        }
+
+        // --- 5. GAMEPLAY ACTIONS (Plant/Harvest) ---
+
+        // Unified Click Handler
+        async function handlePlotClick(button) {
+            // Case 1: Harvesting (Check if image has "Finish")
+            const img = button.querySelector('img');
+            if (img && img.src.includes('Finish')) {
+                await harvestCrop(button);
+                return;
             }
 
-            // Call the function with the savedata
-            extractAndLogCharacterData(saveData);
+            // Case 2: Planting
+            await plantSeed(button);
+        }
 
-        });
+        async function plantSeed(button) {
+            const seedName = gameState.selectedSeed;
+            
+            // Validation
+            if (!seedName || !gameState.inventory[seedName] || gameState.inventory[seedName] <= 0) {
+                showError("Please select a seed first!");
+                return;
+            }
+
+            // 1. Optimistic Update (Immediate UI Change)
+            gameState.inventory[seedName]--; // Decrement local inventory
+            updateSelectedSeedUI(); // Update top bar number
+            
+            // Get Crop Data
+            const cropInfo = CROP_DATA[seedName];
+            if(!cropInfo) return; // Should not happen
+
+            const cropType = cropInfo.result;
+            const growTimeSeconds = cropInfo.time;
+            
+            // Set Button to Growing State
+            button.disabled = true;
+            button.dataset.state = "growing";
+            button.innerHTML = `
+                <img src="img/Crop N Seed Icon/${cropType}.png">
+                <div class="loading-bar"><div class="loading-bar-progress" style="width:0%"></div></div>
+            `;
+
+            // Add to Local Active Crops State
+            const now = new Date();
+            const end = new Date(now.getTime() + (growTimeSeconds * 10)); // *10 because original code seemed to treat time oddly, assuming ms? 
+            // Note: In your original code you passed `growTime * 100`. 
+            // Standard JS is milliseconds. Let's assume CROP_DATA.time is centiseconds based on your code.
+            // Adjust this math if your DB stores seconds.
+            const realDurationMs = growTimeSeconds * 10; 
+            const realEnd = new Date(now.getTime() + realDurationMs);
+
+            gameState.activeCrops.push({
+                id: button.id,
+                cropName: cropType,
+                plantTime: now,
+                endTime: realEnd,
+                finished: false
+            });
+
+            // 2. Network Request (Background)
+            try {
+                // Calculate inventory strings for backend
+                // The backend expects "SeedName-Count"
+                const newInvStr = `${seedName}-${gameState.inventory[seedName]}`;
+                const oldInvStr = `${seedName}-${gameState.inventory[seedName] + 1}`;
+
+                await fetch('/save-plant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        characterName: characterName,
+                        cropType: `${cropType}-${button.id}`,
+                        growTime: realDurationMs, 
+                        newInventory: newInvStr,
+                        oldInventory: oldInvStr
+                    })
+                });
+                
+                // If inventory hits 0, deselect
+                if (gameState.inventory[seedName] === 0) {
+                    gameState.selectedSeed = null;
+                    updateSelectedSeedUI();
+                    renderSeedMenu();
+                }
+
+            } catch (err) {
+                console.error("Planting Failed", err);
+                showError("Failed to save plant!");
+                // Revert state if needed (advanced)
+            }
+        }
+
+        async function harvestCrop(button) {
+            const cropObj = gameState.activeCrops.find(c => c.id === button.id);
+            if (!cropObj) {
+                // Fallback: try to guess from image src if state is lost
+                const imgSrc = button.querySelector('img').src;
+                // logic to extract crop name...
+                console.log("State missing, attempting legacy harvest");
+            }
+            
+            const cropName = cropObj ? cropObj.cropName : ""; // e.g. "carrotCrop"
+            
+            console.log(`Harvesting: ${cropName} from plot ${button.id}`);
+
+            // 1. Optimistic UI Reset
+            button.disabled = false;
+            button.dataset.state = "empty";
+            button.innerHTML = `
+                <span class="plant-text">Plant</span>
+                <img src="img/Crop N Seed Icon/soil.png" class="plant-icon">
+            `;
+            
+            // Remove from local active crops
+            gameState.activeCrops = gameState.activeCrops.filter(c => c.id !== button.id);
+
+            // 2. Network Requests
+            try {
+                // Add Item to Inventory
+                const addRes = await fetch('/addItem2Inv', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ characterName, itemName: cropName, ID: button.id })
+                });
+
+                if(!addRes.ok) throw new Error("Add Inv Failed");
+
+                // Update Experience
+                const xpRes = await fetch('/update-farming-exp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemName: cropName, characterName })
+                });
+
+                const xpData = await xpRes.json();
+                if(xpData.levelUp) {
+                    showNotification(`🎉 Level Up! Level ${xpData.newLevel} 🎉`, 'success');
+                } else {
+                    console.log("XP Added");
+                }
+
+                // 3. Refresh Inventory Background
+                // We reload inventory here to ensure we get the harvested crop into our inventory
+                const invRes = await fetch(`/load-inventory/${characterName}`);
+                const invData = await invRes.json();
+                processInventory(invData);
+
+            } catch (err) {
+                console.error("Harvest Error", err);
+                showError("Error processing harvest");
+            }
+        }
+
+
+        // --- 6. GLOBAL GAME LOOP (Replaces multiple setIntervals) ---
+        function startGlobalGameLoop() {
+            setInterval(() => {
+                const now = new Date();
+
+                gameState.activeCrops.forEach(crop => {
+                    if (crop.finished) return; // Already done
+
+                    const button = document.getElementById(crop.id);
+                    if (!button) return;
+
+                    const totalTime = crop.endTime.getTime() - crop.plantTime.getTime();
+                    const elapsed = now.getTime() - crop.plantTime.getTime();
+                    let percent = (elapsed / totalTime) * 100;
+
+                    if (percent >= 100) {
+                        percent = 100;
+                        crop.finished = true;
+                        
+                        // Update UI to Finish State
+                        button.innerHTML = `<img src="img/Crop N Seed Icon/${crop.cropName}Finish.png">`;
+                        button.disabled = false; // Enable click to harvest
+                        button.dataset.state = "finished";
+                    } else {
+                        // Update Bar
+                        const bar = button.querySelector('.loading-bar-progress');
+                        if (bar) bar.style.width = `${percent}%`;
+                    }
+                });
+            }, 500); // Check every 0.5 seconds
+        }
+
     </script>
 </body>
-
 </html>

@@ -1,1 +1,15 @@
 node_modules
+.git
+.vscode
+compare
+.codetogether.ignore
+test.html
+.env
+asd.html
+
+
+
+
+
+# temp
+/public/img
