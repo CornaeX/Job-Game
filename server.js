@@ -311,6 +311,80 @@ app.post('/cheatAddItem2Inv', (req, res) => {
     });
 });
 
+app.post('/process-fishing', (req, res) => {
+    const { characterName, baitType, success } = req.body;
+    const filePath = getFilePath(characterName);
+
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Character not found' });
+
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+    // 1. Validate and Remove Bait
+    const baitIndex = data.Inventory.findIndex(item => item.startsWith(baitType));
+    
+    if (baitIndex === -1) {
+        return res.status(400).json({ error: 'You do not have this bait!' });
+    }
+
+    const baitParts = data.Inventory[baitIndex].split('-');
+    let baitCount = parseInt(baitParts[1]);
+
+    if (baitCount <= 0) {
+        return res.status(400).json({ error: 'Out of bait!' });
+    }
+
+    // Decrease bait count
+    baitCount -= 1;
+    data.Inventory[baitIndex] = `${baitParts[0]}-${baitCount}`;
+
+    let caughtFish = null;
+    let message = "Bait lost...";
+
+    // 2. If Minigame was successful, Add Fish
+    if (success) {
+        // Simple Loot Table Logic
+        let possibleFish = [];
+        if (baitType === "Worms") possibleFish = ["Minnow", "Sardine", "Perch"];
+        else if (baitType === "Lures") possibleFish = ["Trout", "Salmon", "Mackerel"];
+        else if (baitType === "Minnow") possibleFish = ["Tuna", "Catfish", "Cod"]; // Using fish as bait
+        else possibleFish = ["Carp"]; // Fallback
+
+        // Pick random fish
+        caughtFish = possibleFish[Math.floor(Math.random() * possibleFish.length)];
+        
+        // Add Fish to Inventory
+        const fishIndex = data.Inventory.findIndex(item => item.startsWith(caughtFish));
+        
+        if (fishIndex !== -1) {
+            const fishParts = data.Inventory[fishIndex].split('-');
+            const newCount = parseInt(fishParts[1]) + 1;
+            data.Inventory[fishIndex] = `${fishParts[0]}-${newCount}`;
+        } else {
+            // If fish isn't in inventory array yet, add it
+            data.Inventory.push(`${caughtFish}-1`);
+        }
+        
+        message = `You caught a ${caughtFish}!`;
+        
+        // Optional: Give Fishing EXP
+        const currentExp = (data.Stats.Fishing_EXP || 0) + 15; 
+        data.Stats.Fishing_EXP = currentExp;
+        // (You can add leveling logic here similar to your farming logic)
+    }
+
+    // 3. Save Data
+    fs.writeFile(filePath, JSON.stringify(data, null, 2), (err) => {
+        if (err) return res.status(500).json({ error: 'Error saving fishing data' });
+        
+        res.json({ 
+            message: message, 
+            newInventory: data.Inventory,
+            caughtFish: caughtFish,
+            remainingBait: baitCount
+        });
+    });
+});
+
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'HomePage.html')); });
 app.get('/home', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'GameHomePage.html')); });
 app.get('/create-character', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'CreateCharacterPage.html')); });

@@ -66,205 +66,250 @@
         </div>
     </div>
     <script>
-    let characterName = localStorage.getItem('characterName');
-    console.log(characterName);
-
-    document.getElementById('seedSelect-container').addEventListener('click', function () {
-        if (document.getElementById('select-seed-tab').style.display === 'block') {
+        let characterName = localStorage.getItem('characterName');
+        // GLOBAL VARIABLE TO TRACK SELECTED BAIT
+        let currentSelectedBait = null; 
+    
+        document.getElementById('seedSelect-container').addEventListener('click', function () {
+            const tab = document.getElementById('select-seed-tab');
+            tab.style.display = (tab.style.display === 'block') ? 'none' : 'block';
+        });
+    
+        document.addEventListener('DOMContentLoaded', async () => {
+            function updateUI(characterName, money) {
+                document.getElementById('username').textContent = `${characterName} Farm`;
+                document.getElementById('cash').textContent = `Money $${money}`;
+            }
+    
+            // Updated to handle array or single item updates
+            function updateSeedUI(inventory) {
+                const SeedPanel = document.getElementById('seed-option');
+                SeedPanel.innerHTML = ''; // Clear existing buttons to prevent duplicates
+                
+                const baitList = ["Worms", "Lures", "Minnow"]; // Allowed baits
+                
+                inventory.forEach(function (item) {
+                    var parts = item.split('-');
+                    var itemType = parts[0];
+                    var itemCount = parts[1];
+                    
+                    if (baitList.includes(itemType)) {
+                        var button = document.createElement('button');
+                        button.className = 'seed-select-button';
+                        button.setAttribute('type', 'button');
+                        // Pass the type and count
+                        button.setAttribute('onclick', `selectSeed('${itemType}', ${itemCount})`);
+                        button.setAttribute('id', `btn-${itemType}`);
+                        button.textContent = `${itemType}: ${itemCount}`;
+                        SeedPanel.appendChild(button);
+                        
+                        // Update the main display if this is the currently selected bait
+                        if(currentSelectedBait === itemType) {
+                            document.getElementById('seedCountElement').textContent = `${itemType}: ${itemCount}`;
+                        }
+                    }
+                });
+            }
+    
+            async function fetchCharacterData(name) {
+                const res = await fetch(`/get-character-data?characterName=${name}`);
+                return await res.json();
+            }
+    
+            async function fetchCharacterInvData(name) {
+                const res = await fetch(`/load-inventory/${name}`);
+                return await res.json();
+            }
+    
+            const data = await fetchCharacterData(characterName);
+            if (data) updateUI(data.Character_Name, data.Money);
+    
+            const inv = await fetchCharacterInvData(characterName);
+            if (inv) updateSeedUI(inv);
+            
+            // Expose update function globally so we can refresh UI after fishing
+            window.refreshInventoryUI = updateSeedUI; 
+        });
+    
+        function selectSeed(seedType, seedCount) {
+            // SET THE GLOBAL BAIT VARIABLE
+            currentSelectedBait = seedType;
+            
+            const span_seed = document.getElementById('seedCountElement');
+            span_seed.textContent = `${seedType}: ${seedCount}`;
             document.getElementById('select-seed-tab').style.display = 'none';
-        } else {
-            document.getElementById('select-seed-tab').style.display = 'block';
         }
-    });
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        function updateUI(characterName, money) {
-            const UID = document.getElementById('username');
-            const Cash = document.getElementById('cash');
-            UID.textContent = `${characterName} Farm`;
-            Cash.textContent = `Money $${money}`;
-            console.log(characterName, money);
-        }
-
-        function updateSeedUI(seed) {
-            const SeedPanel = document.getElementById('seed-option');
-            const bait = ["Worms", "Lures", "Minnow"];
-            seed.forEach(function (item) {
-                var parts = item.split('-');
-                var seedType = parts[0];
-                var seedCount = parts[1];
-                if (seedCount > 0 && bait.includes(seedType)) {
-                    var button = document.createElement('button');
-                    button.className = 'seed-select-button';
-                    button.setAttribute('type', 'button');
-                    button.setAttribute('onclick', `selectSeed('${seedType}', ${seedCount})`);
-                    button.setAttribute('id', `${seedType}`);
-                    button.textContent = `${seedType}: ${seedCount}`;
-                    SeedPanel.appendChild(button);
-                }
-            });
-        }
-
-        async function fetchCharacterData(characterName) {
-            try {
-                const response = await fetch(`/get-character-data?characterName=${characterName}`);
-                if (!response.ok) throw new Error('Failed to fetch save data');
-                return await response.json();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while fetching save data.');
+    
+        // --- GAME LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const fishImage = document.getElementById('fishImage');
+            const catchButton = document.getElementById('catchButton');
+            const catchButtonDark = document.getElementById('catchButtonDark');
+            const message = document.getElementById('message');
+            const line = document.getElementById('line');
+            const target = document.getElementById('target');
+            const bar = document.getElementById('bar');
+            
+            let targetPosition;
+            let success = false;
+            let gameTimeout;
+            let isMiniGameStarted = false;
+    
+            // ... [Keep getRandomPosition, getRandomFadeDuration functions the same] ...
+            function getRandomPosition() {
+                const pondContainer = document.querySelector('.pond-container');
+                return { 
+                    x: Math.random() * (pondContainer.offsetWidth - fishImage.offsetWidth), 
+                    y: Math.random() * (pondContainer.offsetHeight - fishImage.offsetHeight) 
+                };
             }
-        }
-
-        async function fetchCharacterInvData(characterName) {
-            try {
-                const response = await fetch(`/load-inventory/${characterName}`);
-                if (!response.ok) throw new Error('Failed to fetch save data');
-                return await response.json();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while fetching save data.');
+    
+            function showFish() {
+                const { x, y } = getRandomPosition();
+                fishImage.style.left = `${x}px`;
+                fishImage.style.top = `${y}px`;
+                // Simplified animation logic for brevity
+                fishImage.style.transition = `opacity 1s`;
+                fishImage.style.opacity = 1;
+                setTimeout(() => {
+                    fishImage.style.opacity = 0;
+                    setTimeout(showFish, 1500); 
+                }, 2000);
             }
-        }
-
-        const updatedSaveData = await fetchCharacterData(characterName);
-        if (updatedSaveData) updateUI(updatedSaveData.Character_Name, updatedSaveData.Money);
-
-        const updatedSaveInvData = await fetchCharacterInvData(characterName);
-        if (updatedSaveInvData) updateSeedUI(updatedSaveInvData);
-    });
-
-    function selectSeed(seedType, seedCount) {
-        const span_seed = document.getElementById('seedCountElement');
-        span_seed.textContent = `${seedType}: ${seedCount}`;
-        document.getElementById('select-seed-tab').style.display = 'none';
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const fishImage = document.getElementById('fishImage');
-        const catchButton = document.getElementById('catchButton');
-        const catchButtonDark = document.getElementById('catchButtonDark');
-        const message = document.getElementById('message');
-        const line = document.getElementById('line');
-        const target = document.getElementById('target');
-        const bar = document.getElementById('bar');
-        let targetPosition;
-        let success = false;
-        let gameTimeout;
-        let isMiniGameStarted = false;
-
-        function getRandomPosition() {
-            const pondContainer = document.querySelector('.pond-container');
-            const pondWidth = pondContainer.offsetWidth;
-            const pondHeight = pondContainer.offsetHeight;
-            const fishWidth = fishImage.offsetWidth;
-            const fishHeight = fishImage.offsetHeight;
-            const maxX = pondWidth - fishWidth;
-            const maxY = pondHeight - fishHeight;
-            return { x: Math.random() * maxX, y: Math.random() * maxY };
-        }
-
-        function getRandomFadeDuration() {
-            return Math.random() * 1 + 0.3; // Between 0.3s and 1.3s
-        }
-
-        function showFish() {
-            const { x, y } = getRandomPosition();
-            fishImage.style.left = `${x}px`;
-            fishImage.style.top = `${y}px`;
-            const fadeDuration = getRandomFadeDuration();
-            fishImage.style.transition = `opacity ${fadeDuration}s`;
-            fishImage.style.opacity = 1;
-            setTimeout(() => {
-                fishImage.style.opacity = 0;
-                setTimeout(showFish, fadeDuration * 1000);
-            }, fadeDuration * 1000);
-        }
-
-        fishImage.addEventListener('click', () => {
-            fishImage.style.display = 'none';
-            catchButtonDark.style.display = 'block';
-            waitForCursorOnCatchButton(); // Wait for cursor to hover over the button
-        });
-
-        function waitForCursorOnCatchButton() {
-            catchButtonDark.addEventListener('mouseover', function handler() {
-                catchButtonDark.style.display = 'none';
-                catchButton.style.display = 'block';
-                if (!isMiniGameStarted) {
-                    isMiniGameStarted = true;
-                    showMiniGame(); // Start the mini-game
-                }
-                // Remove the event listener after the first hover
-                catchButton.removeEventListener('mouseover', handler);
-            });
-        }
-
-        catchButton.addEventListener('click', () => {
-            clearTimeout(gameTimeout);
-            const lineRect = line.getBoundingClientRect();
-            const targetRect = target.getBoundingClientRect();
-            const detectionMargin = 5;
-
-            if (
-                lineRect.left + detectionMargin >= targetRect.left &&
-                lineRect.right - detectionMargin <= targetRect.right
-            ) {
-                message.textContent = "Success! You caught a fish!";
-                success = true;
-            } else {
-                message.textContent = "You missed the fish.";
-            }
-
-            setTimeout(() => {
-                message.classList.add('fade-out');
-            }, 2000);
-            message.classList.remove('fade-out');
-            hideMiniGame();
-        });
-
-        function showMiniGame() {
-            const targetWidth = Math.random() * 20 + 15;
-            target.style.width = targetWidth + 'px';
-            targetPosition = Math.random() * (300 - targetWidth);
-            target.style.left = targetPosition + 'px';
-
-            success = false;
-            bar.style.display = 'block';
-            line.style.animationPlayState = 'running';
-            bar.style.display = 'block';
-            line.style.display = 'block';
-            target.style.display = 'block';
-
-            gameTimeout = setTimeout(() => {
-                if (!success) {
-                    message.textContent = "Time's up! You didn't catch the fish.";
-                    hideMiniGame();
-                    setTimeout(() => {
-                        message.classList.add('fade-out');
-                    }, 2000);
+    
+            fishImage.addEventListener('click', () => {
+                // CHECK IF BAIT IS SELECTED
+                if (!currentSelectedBait) {
+                    message.textContent = "You need to select bait first!";
                     message.classList.remove('fade-out');
+                    setTimeout(() => message.classList.add('fade-out'), 2000);
+                    return;
                 }
-            }, 4000);
-        }
-
-        function hideMiniGame() {
-            line.style.animationPlayState = 'paused';
-            bar.style.display = 'none';
-            catchButton.style.display = 'none';
-            fishImage.style.display = 'block';
-            isMiniGameStarted = false; // Reset the flag
-        }
-
-        showFish();
-    });
-
-    const logoutLink = document.getElementById('logout-link');
-    logoutLink.addEventListener('click', () => {
-        localStorage.removeItem('characterName');
-        window.location.href = '/create-character';
-    });
-</script>
+    
+                // Check if user has ammo (visually check the text content)
+                const currentLabel = document.getElementById('seedCountElement').textContent;
+                const currentCount = parseInt(currentLabel.split(':')[1]);
+                
+                if (currentCount <= 0) {
+                    message.textContent = "You are out of this bait!";
+                    return;
+                }
+    
+                fishImage.style.display = 'none';
+                catchButtonDark.style.display = 'block';
+                waitForCursorOnCatchButton();
+            });
+    
+            function waitForCursorOnCatchButton() {
+                catchButtonDark.addEventListener('mouseover', function handler() {
+                    catchButtonDark.style.display = 'none';
+                    catchButton.style.display = 'block';
+                    if (!isMiniGameStarted) {
+                        isMiniGameStarted = true;
+                        showMiniGame();
+                    }
+                    catchButton.removeEventListener('mouseover', handler);
+                });
+            }
+    
+            catchButton.addEventListener('click', async () => {
+                clearTimeout(gameTimeout);
+                const lineRect = line.getBoundingClientRect();
+                const targetRect = target.getBoundingClientRect();
+                const detectionMargin = 5;
+    
+                // Determine Success Locally
+                success = (
+                    lineRect.left + detectionMargin >= targetRect.left &&
+                    lineRect.right - detectionMargin <= targetRect.right
+                );
+    
+                // --- CALL SERVER TO PROCESS RESULT ---
+                try {
+                    const response = await fetch('/process-fishing', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            characterName: characterName,
+                            baitType: currentSelectedBait,
+                            success: success
+                        })
+                    });
+    
+                    const result = await response.json();
+    
+                    if (response.ok) {
+                        message.textContent = result.message; // "You caught a Trout!" or "Bait lost..."
+                        
+                        // Update Inventory UI with new data from server
+                        window.refreshInventoryUI(result.newInventory);
+                    } else {
+                        message.textContent = result.error || "Error processing fishing.";
+                    }
+    
+                } catch (error) {
+                    console.error(error);
+                    message.textContent = "Server error.";
+                }
+    
+                setTimeout(() => { message.classList.add('fade-out'); }, 2000);
+                message.classList.remove('fade-out');
+                hideMiniGame();
+            });
+    
+            function showMiniGame() {
+                const targetWidth = Math.random() * 20 + 20; // Slightly easier
+                target.style.width = targetWidth + 'px';
+                targetPosition = Math.random() * (280 - targetWidth);
+                target.style.left = targetPosition + 'px';
+    
+                success = false;
+                bar.style.display = 'block';
+                line.style.animationPlayState = 'running';
+                line.style.display = 'block';
+                target.style.display = 'block';
+    
+                gameTimeout = setTimeout(async () => {
+                    if (!success) {
+                        message.textContent = "Time's up! Bait lost.";
+                        
+                        // Consume bait even on timeout
+                        await fetch('/process-fishing', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                characterName: characterName,
+                                baitType: currentSelectedBait,
+                                success: false
+                            })
+                        }).then(res => res.json()).then(data => {
+                            if(data.newInventory) window.refreshInventoryUI(data.newInventory);
+                        });
+    
+                        hideMiniGame();
+                        setTimeout(() => message.classList.add('fade-out'), 2000);
+                        message.classList.remove('fade-out');
+                    }
+                }, 4000);
+            }
+    
+            function hideMiniGame() {
+                line.style.animationPlayState = 'paused';
+                bar.style.display = 'none';
+                catchButton.style.display = 'none';
+                fishImage.style.display = 'block';
+                isMiniGameStarted = false;
+            }
+    
+            showFish();
+        });
+        
+        // Logout logic
+        document.getElementById('logout-link').addEventListener('click', () => {
+            localStorage.removeItem('characterName');
+            window.location.href = '/create-character';
+        });
+    </script>
 </body>
 
 </html>
